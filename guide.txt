@@ -1,0 +1,14 @@
+* For restart docker ->
+    docker compose up --build
+
+* For project deveopement for use nodemon you need to stop the docker service and run only mysql docker container -> 
+    docker compose up mysql
+
+if(runOn == 'docker'){
+
+    change .env file -->> MYSQL_HOST=mysql
+
+}else if(runOn == 'nodemon'){
+
+    change .env file -->> MYSQL_HOST=localhost
+}
