@@ -7,18 +7,53 @@ import {
   deletePersonnel,
 } from "../handlers/personnel.js";
 
+import {
+  createSkill,
+  getAllSkills,
+  getSkillById,
+  updateSkill,
+  deleteSkill,
+} from "../handlers/skills.js";
+
+import {
+  assignSkillToPersonnel,
+  getSkillsForPersonnel,
+  updatePersonnelSkill,
+  deletePersonnelSkill,
+} from "../handlers/personnelSkills.js";
+
 const router = express.Router();
 
-// Simple health check
+// Health check
 router.get("/health", (req, res) => {
   res.json({ status: "ok" });
 });
 
-// Personnel CRUD routes
-router.post("/personnel", createPersonnel);       // Create
-router.get("/personnel", getAllPersonnel);        // Read all
-router.get("/personnel/:id", getPersonnelById);   // Read one
-router.put("/personnel/:id", updatePersonnel);    // Update
-router.delete("/personnel/:id", deletePersonnel); // Delete
+/*  PERSONNEL CRUD  */
+router.post("/personnel", createPersonnel);
+router.get("/personnel", getAllPersonnel);
+router.get("/personnel/:id", getPersonnelById);
+router.put("/personnel/:id", updatePersonnel);
+router.delete("/personnel/:id", deletePersonnel);
+
+/*  SKILLS CRUD */
+router.post("/skills", createSkill);
+router.get("/skills", getAllSkills);
+router.get("/skills/:id", getSkillById);
+router.put("/skills/:id", updateSkill);
+router.delete("/skills/:id", deleteSkill);
+
+/* PERSONNEL-SKILLS ASSIGNMENT  */
+
+router.post("/personnel/:personnelId/skills", assignSkillToPersonnel);
+router.get("/personnel/:personnelId/skills", getSkillsForPersonnel);
+router.put(
+  "/personnel/:personnelId/skills/:skillId",
+  updatePersonnelSkill
+);
+router.delete(
+  "/personnel/:personnelId/skills/:skillId",
+  deletePersonnelSkill
+);
 
 export default router;

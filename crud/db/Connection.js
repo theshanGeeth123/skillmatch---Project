@@ -13,6 +13,7 @@ const pool = createPool({
 
 // NEW: function to create tables through the project (not manually in MySQL)
 const initDatabase = async () => {
+  // 1) Personnel table
   const createPersonnelTableSQL = `
     CREATE TABLE IF NOT EXISTS personnel (
       id INT AUTO_INCREMENT PRIMARY KEY,
@@ -24,14 +25,51 @@ const initDatabase = async () => {
     )
   `;
 
+  // 2) Skills table
+  const createSkillsTableSQL = `
+    CREATE TABLE IF NOT EXISTS skills (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      name VARCHAR(100) NOT NULL,
+      category ENUM('Programming Language','Framework','Tool','Soft Skill') NOT NULL,
+      description TEXT,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `;
+
+  // 3) Personnel-Skills junction table (many-to-many)
+  // We use numeric proficiency: 1–5 (1=Beginner, 5=Expert)
+  const createPersonnelSkillsTableSQL = `
+    CREATE TABLE IF NOT EXISTS personnel_skills (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      personnel_id INT NOT NULL,
+      skill_id INT NOT NULL,
+      proficiency TINYINT NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE KEY unique_personnel_skill (personnel_id, skill_id),
+      CONSTRAINT fk_personnel
+        FOREIGN KEY (personnel_id) REFERENCES personnel(id)
+        ON DELETE CASCADE,
+      CONSTRAINT fk_skill
+        FOREIGN KEY (skill_id) REFERENCES skills(id)
+        ON DELETE CASCADE
+    )
+  `;
+
   try {
     await pool.query(createPersonnelTableSQL);
     console.log("✅ personnel table is ready");
+
+    await pool.query(createSkillsTableSQL);
+    console.log("✅ skills table is ready");
+
+    await pool.query(createPersonnelSkillsTableSQL);
+    console.log("✅ personnel_skills table is ready");
   } catch (error) {
-    console.error("❌ Error creating personnel table", error);
+    console.error("❌ Error creating tables", error);
     throw error;
   }
 };
+
 
 const connectToDatabse = async () => {
   try {
