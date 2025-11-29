@@ -1,0 +1,33 @@
+services:
+  mysql:
+    image: mysql:latest
+    container_name: sqldb
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: gtg5366stc
+      MYSQL_DATABASE: ecom
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysqldata:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -p$MYSQL_ROOT_PASSWORD || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  backend:
+    build: ./crud
+    container_name: crud-backend
+    ports:
+      - "5000:5000"
+    env_file:
+      - ./crud/.env
+    depends_on:
+      mysql:
+        condition: service_healthy   # wait until MySQL is ready
+    restart: on-failure              # if something goes wrong, try again
+
+volumes:
+  mysqldata:
