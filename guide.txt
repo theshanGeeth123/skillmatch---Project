@@ -12,3 +12,6 @@ if(runOn == 'docker'){
 
     change .env file -->> MYSQL_HOST=localhost
 }
+
+
+For test -- > http://localhost:5000/api/test
