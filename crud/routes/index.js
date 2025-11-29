@@ -1,11 +1,24 @@
-import { Router } from "express";
+import express from "express";
+import {
+  createPersonnel,
+  getAllPersonnel,
+  getPersonnelById,
+  updatePersonnel,
+  deletePersonnel,
+} from "../handlers/personnel.js";
 
-const appRouter = Router();
+const router = express.Router();
 
-appRouter.get("/",(req,res)=> {
-    res.send("Working 1234522dfde ");
-})
+// Simple health check
+router.get("/health", (req, res) => {
+  res.json({ status: "ok" });
+});
 
+// Personnel CRUD routes
+router.post("/personnel", createPersonnel);       // Create
+router.get("/personnel", getAllPersonnel);        // Read all
+router.get("/personnel/:id", getPersonnelById);   // Read one
+router.put("/personnel/:id", updatePersonnel);    // Update
+router.delete("/personnel/:id", deletePersonnel); // Delete
 
-
-export default appRouter;
+export default router;

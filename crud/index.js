@@ -1,7 +1,7 @@
 import express from 'express';
 import appRouter from './routes/index.js';
 import {config} from "dotenv"
-import { connectToDatabse } from './db/index.js';
+import { connectToDatabse } from './db/Connection.js';
 
 const app = express();
 
