@@ -3,15 +3,16 @@ import { config } from "dotenv";
 
 config();
 
+// Create the connection pool
 const pool = createPool({
-  port: process.env.MYSQL_PORT,
-  password: process.env.MYSQL_PASSWORD,
-  host: process.env.MYSQL_HOST,
-  database: process.env.MYSQL_DATABASE_NAME,
+  host: process.env.MYSQL_HOST || "localhost",
+  port: Number(process.env.MYSQL_PORT) || 3306,
   user: process.env.MYSQL_USER,
+  password: process.env.MYSQL_PASSWORD,
+  database: process.env.MYSQL_DATABASE_NAME,
 });
 
-// NEW: function to create tables through the project (not manually in MySQL)
+// Create tables through the project (not manually in MySQL)
 const initDatabase = async () => {
   // 1) Personnel table
   const createPersonnelTableSQL = `
@@ -36,8 +37,7 @@ const initDatabase = async () => {
     )
   `;
 
-  // 3) Personnel-Skills junction table (many-to-many)
-  // We use numeric proficiency: 1–5 (1=Beginner, 5=Expert)
+  // 3) Personnel-Skills junction table
   const createPersonnelSkillsTableSQL = `
     CREATE TABLE IF NOT EXISTS personnel_skills (
       id INT AUTO_INCREMENT PRIMARY KEY,
@@ -55,6 +55,37 @@ const initDatabase = async () => {
     )
   `;
 
+  // 4) Projects table
+  const createProjectsTableSQL = `
+    CREATE TABLE IF NOT EXISTS projects (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      name VARCHAR(150) NOT NULL,
+      description TEXT,
+      start_date DATE,
+      end_date DATE,
+      status ENUM('Planning','Active','Completed') NOT NULL DEFAULT 'Planning',
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `;
+
+  // 5) Project required skills table
+  const createProjectRequiredSkillsTableSQL = `
+    CREATE TABLE IF NOT EXISTS project_required_skills (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      project_id INT NOT NULL,
+      skill_id INT NOT NULL,
+      min_proficiency TINYINT NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE KEY unique_project_skill (project_id, skill_id),
+      CONSTRAINT fk_project
+        FOREIGN KEY (project_id) REFERENCES projects(id)
+        ON DELETE CASCADE,
+      CONSTRAINT fk_project_skill
+        FOREIGN KEY (skill_id) REFERENCES skills(id)
+        ON DELETE CASCADE
+    )
+  `;
+
   try {
     await pool.query(createPersonnelTableSQL);
     console.log("✅ personnel table is ready");
@@ -64,6 +95,12 @@ const initDatabase = async () => {
 
     await pool.query(createPersonnelSkillsTableSQL);
     console.log("✅ personnel_skills table is ready");
+
+    await pool.query(createProjectsTableSQL);
+    console.log("✅ projects table is ready");
+
+    await pool.query(createProjectRequiredSkillsTableSQL);
+    console.log("✅ project_required_skills table is ready");
   } catch (error) {
     console.error("❌ Error creating tables", error);
     throw error;
@@ -71,16 +108,39 @@ const initDatabase = async () => {
 };
 
 
+// NOTE: name kept as connectToDatabse to match your existing imports
 const connectToDatabse = async () => {
-  try {
-    await pool.getConnection();
-    console.log("Database connected successfully");
+  const maxRetries = 10;
+  let attempt = 0;
 
-    // NEW: ensure tables exist
-    await initDatabase();
-  } catch (error) {
-    console.log("Database connection failed", error);
-    throw error;
+  while (attempt < maxRetries) {
+    try {
+      attempt++;
+      console.log(
+        `Trying to connect to database (attempt ${attempt}/${maxRetries})...`
+      );
+
+      // Test connection
+      await pool.getConnection();
+      console.log("✅ Database connected successfully");
+
+      // Ensure tables exist
+      await initDatabase();
+      return; // success – exit the function
+    } catch (error) {
+      console.error(
+        `❌ Database connection failed (attempt ${attempt}/${maxRetries}):`,
+        error.message || error
+      );
+
+      if (attempt >= maxRetries) {
+        console.error("❌ Giving up connecting to database after max retries");
+        throw error;
+      }
+
+      // Wait 3 seconds before next try
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+    }
   }
 };
 
