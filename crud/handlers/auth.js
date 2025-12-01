@@ -19,7 +19,7 @@ const generateToken = (user) => {
 };
 
 export const register = async (req, res) => {
-  const { name, email, password, role } = req.body;
+  const { name, email, password } = req.body; 
 
   if (!name || !email || !password) {
     return res.status(400).json({
@@ -29,6 +29,7 @@ export const register = async (req, res) => {
   }
 
   try {
+    
     const [existing] = await pool.query(
       `SELECT id FROM users WHERE email = ?`,
       [email]
@@ -43,7 +44,7 @@ export const register = async (req, res) => {
 
     const passwordHash = await bcrypt.hash(password, 10);
 
-    const userRole = role === "User" ? "User" : "Admin";
+    const userRole = "Admin"; 
 
     const [result] = await pool.query(
       `
@@ -76,6 +77,7 @@ export const register = async (req, res) => {
       .json({ success: false, message: "Internal server error" });
   }
 };
+
 
 export const login = async (req, res) => {
   const { email, password } = req.body;
