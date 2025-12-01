@@ -11,6 +11,10 @@ import {addRequiredSkillToProject,getRequiredSkillsForProject,updateProjectRequi
 
 import { getProjectMatches } from "../handlers/matching.js";
 
+import { register, login } from "../handlers/auth.js";
+import { authMiddleware } from "../middleware/authMiddleware.js";
+
+
 
 const router = express.Router();
 
@@ -71,8 +75,14 @@ router.delete(
 );
 
 
-//  MATCHING ALGORITHM  
+//  Matching relvant personnel for project
 router.get("/projects/:projectId/matches", getProjectMatches);
+
+// For User
+router.post("/auth/register", register);
+router.post("/auth/login", login);
+
 
 
 export default router;
+

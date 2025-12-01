@@ -14,6 +14,18 @@ const pool = createPool({
 
 // Create tables through the project (not manually in MySQL)
 const initDatabase = async () => {
+  // 0) Users table (for login/register)
+  const createUsersTableSQL = `
+    CREATE TABLE IF NOT EXISTS users (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      name VARCHAR(100) NOT NULL,
+      email VARCHAR(150) NOT NULL UNIQUE,
+      password_hash VARCHAR(255) NOT NULL,
+      role ENUM('Admin','User') NOT NULL DEFAULT 'Admin',
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `;
+
   // 1) Personnel table
   const createPersonnelTableSQL = `
     CREATE TABLE IF NOT EXISTS personnel (
@@ -87,6 +99,9 @@ const initDatabase = async () => {
   `;
 
   try {
+    await pool.query(createUsersTableSQL);
+    console.log("✅ users table is ready");
+
     await pool.query(createPersonnelTableSQL);
     console.log("✅ personnel table is ready");
 
@@ -106,6 +121,7 @@ const initDatabase = async () => {
     throw error;
   }
 };
+
 
 
 // NOTE: name kept as connectToDatabse to match your existing imports
