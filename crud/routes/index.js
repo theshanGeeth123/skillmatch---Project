@@ -14,6 +14,14 @@ import { getProjectMatches } from "../handlers/matching.js";
 import { register, login } from "../handlers/auth.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
 
+// chart 1
+
+import { getSkillsDistribution,getExperienceLevelStats,getProjectStatusStats,getProjectSkillCoverage  } from "../handlers/stats.js";
+
+// report
+
+import { getSystemOverviewReport } from "../handlers/reports.js";
+
 
 
 const router = express.Router();
@@ -82,6 +90,16 @@ router.get("/projects/:projectId/matches", getProjectMatches);
 router.post("/auth/register", register);
 router.post("/auth/login", login);
 
+
+// charts 
+
+router.get("/stats/skills-distribution", getSkillsDistribution);
+router.get("/stats/experience-levels", getExperienceLevelStats);
+router.get("/stats/project-status", getProjectStatusStats);
+router.get("/projects/:projectId/skill-coverage", getProjectSkillCoverage);
+
+// reports
+router.get("/reports/overview", getSystemOverviewReport);
 
 
 export default router;
