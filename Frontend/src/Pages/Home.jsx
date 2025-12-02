@@ -11,10 +11,7 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
 import AOS from "aos";
 import "aos/dist/aos.css";
 
-
-
 const Home = () => {
-
   useEffect(() => {
     AOS.init({
       duration: 800,
@@ -26,7 +23,6 @@ const Home = () => {
     <div
       className="min-h-screen w-full bg-cover bg-center bg-fixed  "
       style={{ backgroundImage: `url(${BGImage})` }}
-      
     >
       <NavBar1 />
 
@@ -34,20 +30,27 @@ const Home = () => {
         className="
           lg:px-40 md:px-10 bg-black/45 h-[100vh] 
           flex flex-col justify-center items-center text-center px-6  "
-
-          
       >
-        <h1 className="text-4xl md:text-5xl font-extrabold text-white tracking-wide" data-aos="fade-up" >
+        <h1
+          className="text-4xl md:text-5xl font-extrabold text-white tracking-wide"
+          data-aos="fade-up"
+        >
           Skill Fusion
         </h1>
 
-        <p data-aos="fade-up" data-aos-delay="200"  className="mt-14 font-medium lg:text-[20px] md:text-[15px] max-w-[600px] text-gray-200 leading-relaxed w-[90%] md:w-[70%] lg:w-[60%]">
+        <p
+          data-aos="fade-up"
+          data-aos-delay="200"
+          className="mt-14 font-medium lg:text-[20px] md:text-[15px] max-w-[600px] text-gray-200 leading-relaxed w-[90%] md:w-[70%] lg:w-[60%]"
+        >
           Skill Fusion is a modern platform designed to streamline project and
           skill management. Manage team skills, track project requirements, and
           match the right people to the right tasks with precision and ease.
         </p>
- 
-        <button data-aos="fade-up" data-aos-delay="400"
+
+        <button
+          data-aos="fade-up"
+          data-aos-delay="400"
           onClick={() => {
             document.getElementById("section2")?.scrollIntoView({
               behavior: "smooth",
@@ -62,7 +65,6 @@ const Home = () => {
 
       <div id="section2" className="bg-black/45 py-20 ">
         <div className="max-w-7xl mx-auto px-6 text-white">
-     
           <div className="text-center mb-14">
             <h2 className="text-3xl md:text-4xl font-bold tracking-wide">
               Our Services
@@ -73,10 +75,10 @@ const Home = () => {
             </p>
           </div>
 
-       
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
-          
-            <div data-aos="flip-up" data-aos-delay="100"
+            <div
+              data-aos="flip-up"
+              data-aos-delay="100"
               className="bg-white/10 backdrop-blur-md border border-white/20 
     rounded-2xl p-6 shadow-lg 
     transition-all duration-500
@@ -94,8 +96,9 @@ const Home = () => {
               </p>
             </div>
 
-         
-            <div data-aos="flip-up" data-aos-delay="500"
+            <div
+              data-aos="flip-up"
+              data-aos-delay="500"
               className="bg-white/10 backdrop-blur-md border border-white/20 
     rounded-2xl p-6 shadow-lg 
     transition-all duration-500
@@ -112,14 +115,15 @@ const Home = () => {
               </p>
             </div>
 
-       
-            <div data-aos="flip-up" data-aos-delay="900"
+            <div
+              data-aos="flip-up"
+              data-aos-delay="900"
               className="bg-white/10 backdrop-blur-md border border-white/20 
-    rounded-2xl p-6 shadow-lg 
-    transition-all duration-500
-    hover:-translate-y-3 hover:scale-[1.03]
-    hover:shadow-2xl hover:bg-white/20
-    hover:border-white/40 cursor-pointer"
+                rounded-2xl p-6 shadow-lg 
+                transition-all duration-500
+                hover:-translate-y-3 hover:scale-[1.03]
+                hover:shadow-2xl hover:bg-white/20
+                hover:border-white/40 cursor-pointer"
             >
               <h3 className="text-xl font-semibold mb-3">
                 Manage Member Skills
@@ -130,14 +134,15 @@ const Home = () => {
               </p>
             </div>
 
-       
-            <div data-aos="flip-up" data-aos-delay="1300"
+            <div
+              data-aos="flip-up"
+              data-aos-delay="1300"
               className="bg-white/10 backdrop-blur-md border border-white/20 
-    rounded-2xl p-6 shadow-lg 
-    transition-all duration-500
-    hover:-translate-y-3 hover:scale-[1.03]
-    hover:shadow-2xl hover:bg-white/20
-    hover:border-white/40 cursor-pointer"
+                rounded-2xl p-6 shadow-lg 
+                transition-all duration-500
+                hover:-translate-y-3 hover:scale-[1.03]
+                hover:shadow-2xl hover:bg-white/20
+                hover:border-white/40 cursor-pointer"
             >
               <h3 className="text-xl font-semibold mb-3">Charts & Analytics</h3>
               <p className="text-gray-300 text-sm">
@@ -151,7 +156,6 @@ const Home = () => {
 
       <div className="bg-black/45 py-20">
         <div className="max-w-6xl mx-auto px-6 text-white">
-     
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold tracking-wide">
               What Our Users Say
@@ -163,11 +167,8 @@ const Home = () => {
           </div>
 
           <div className="grid gap-8 md:grid-cols-3">
-         
             <div className="relative bg-white/5 border border-white/10 rounded-2xl p-8 pt-14 shadow-lg backdrop-blur-md">
-           
               <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-16 h-16 rounded-full overflow-hidden border-4 border-black/60">
-              
                 <img
                   src={PImage1}
                   alt="User 1"
@@ -244,15 +245,14 @@ const Home = () => {
         </div>
       </div>
 
-      <footer className="lx-footer relative bg-gray-950 px-4 py-8 text-center text-[#f4f4f4] border-t-1  shadow-lg b">
-  
-        <div className="lx-footer__subscribe" >
+      <footer className="lx-footer relative bg-gray-950/90 px-4 py-8 text-center text-[#f4f4f4] border-t-1  shadow-lg b">
+        <div className="lx-footer__subscribe">
           <h3 className="mb-4 font-medium">
             Stay up to date on the latest from SkillFusion
           </h3>
         </div>
 
-        <div className="lx-footer__social mt-8" >
+        <div className="lx-footer__social mt-8">
           <h4 className="mb-4 font-semibold">Follow SkillFusion </h4>
           <div className="lx-footer__icons flex justify-center gap-2">
             {[
@@ -273,7 +273,7 @@ const Home = () => {
           </div>
         </div>
 
-        <div className="lx-footer__meta mt-8 text-[#b3b3b3]" >
+        <div className="lx-footer__meta mt-8 text-[#b3b3b3]">
           <p>
             <br />
           </p>

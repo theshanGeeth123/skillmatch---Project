@@ -17,22 +17,12 @@ const NavBar1 = () => {
           />
         </div>
 
-        <div className="flex items-center gap-4">
 
-          <Link to="/login?mode=login">
+          <Link to="/">
             <button className="px-5 py-2 rounded-lg border border-white text-white hover:bg-gray-100 hover:text-black transition">
-              Sign In
+              Home
             </button>
           </Link>
-
-          <Link to="/login?mode=register">
-            <button className="px-5 py-2 rounded-lg bg-gray-800 text-white hover:bg-black transition">
-              Sign Up
-            </button>
-          </Link>
-
-        </div>
-
       </div>
     </nav>
   );
