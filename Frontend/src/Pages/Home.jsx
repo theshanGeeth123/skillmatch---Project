@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import BGImage from "../Images/Image2.jpg";
 import NavBar1 from "../NavBar/NavBar1";
 
@@ -15,7 +15,12 @@ import "aos/dist/aos.css";
 
 const Home = () => {
 
-  AOS.init();
+  useEffect(() => {
+    AOS.init({
+      duration: 800,
+      once: true,
+    });
+  }, []);
 
   return (
     <div
@@ -73,7 +78,12 @@ const Home = () => {
           
             <div data-aos="flip-up" data-aos-delay="100"
               className="bg-white/10 backdrop-blur-md border border-white/20 
-                      rounded-2xl p-6 shadow-lg hover:-translate-y-2 transition-all duration-300"
+    rounded-2xl p-6 shadow-lg 
+    transition-all duration-500
+    hover:-translate-y-3 hover:scale-[1.03]
+    hover:shadow-2xl hover:bg-white/20
+    hover:border-white/40 cursor-pointer
+                      "
             >
               <h3 className="text-xl font-semibold mb-3">
                 Personnel Management
@@ -87,7 +97,11 @@ const Home = () => {
          
             <div data-aos="flip-up" data-aos-delay="500"
               className="bg-white/10 backdrop-blur-md border border-white/20 
-                      rounded-2xl p-6 shadow-lg hover:-translate-y-2 transition-all duration-300"
+    rounded-2xl p-6 shadow-lg 
+    transition-all duration-500
+    hover:-translate-y-3 hover:scale-[1.03]
+    hover:shadow-2xl hover:bg-white/20
+    hover:border-white/40 cursor-pointer"
             >
               <h3 className="text-xl font-semibold mb-3">
                 Find Relevant Team Members
@@ -101,7 +115,11 @@ const Home = () => {
        
             <div data-aos="flip-up" data-aos-delay="900"
               className="bg-white/10 backdrop-blur-md border border-white/20 
-                      rounded-2xl p-6 shadow-lg hover:-translate-y-2 transition-all duration-300"
+    rounded-2xl p-6 shadow-lg 
+    transition-all duration-500
+    hover:-translate-y-3 hover:scale-[1.03]
+    hover:shadow-2xl hover:bg-white/20
+    hover:border-white/40 cursor-pointer"
             >
               <h3 className="text-xl font-semibold mb-3">
                 Manage Member Skills
@@ -115,7 +133,11 @@ const Home = () => {
        
             <div data-aos="flip-up" data-aos-delay="1300"
               className="bg-white/10 backdrop-blur-md border border-white/20 
-                      rounded-2xl p-6 shadow-lg hover:-translate-y-2 transition-all duration-300"
+    rounded-2xl p-6 shadow-lg 
+    transition-all duration-500
+    hover:-translate-y-3 hover:scale-[1.03]
+    hover:shadow-2xl hover:bg-white/20
+    hover:border-white/40 cursor-pointer"
             >
               <h3 className="text-xl font-semibold mb-3">Charts & Analytics</h3>
               <p className="text-gray-300 text-sm">
