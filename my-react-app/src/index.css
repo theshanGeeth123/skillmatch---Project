@@ -1,3 +1,61 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.toggle-switch {
+  position: fixed;
+  width: 60px;    /* reduced width */
+  height: 30px;   /* reduced height */
+  --light: #d8dbe0;
+  --dark: #28292c;
+  --link: rgb(27, 129, 112);
+  --link-hover: rgb(24, 94, 82);
+  top: 10px;
+  right: 10px;
+}
+
+.switch-label {
+  position: absolute;
+  width: 100%;
+  height: 100%;   /* match container */
+  background-color: var(--dark);
+  border-radius: 20px;  /* reduced radius */
+  cursor: pointer;
+  border: 2px solid var(--dark); /* smaller border */
+}
+
+.checkbox {
+  position: absolute;
+  display: none;
+}
+
+.slider {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 20px;
+  transition: 0.3s;
+}
+
+.checkbox:checked ~ .slider {
+  background-color: var(--light);
+}
+
+.slider::before {
+  content: "";
+  position: absolute;
+  top: 5px;       /* adjusted */
+  left: 5px;      /* adjusted */
+  width: 20px;    /* smaller knob */
+  height: 20px;   /* smaller knob */
+  border-radius: 50%;
+  box-shadow: inset 10px -4px 0px 0px var(--light);
+  background-color: var(--dark);
+  transition: 0.3s;
+}
+
+.checkbox:checked ~ .slider::before {
+  transform: translateX(30px);  /* adjusted movement */
+  background-color: var(--dark);
+  box-shadow: none;
+}
