@@ -1,10 +1,15 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import NavBar2 from "../NavBar/NavBar2";
 import Footer1 from "../Footers/Footer1";
 
 const API_BASE_URL = "http://localhost:5000/api";
 
 const ProjectRequiredSkills = () => {
+  const navigate = useNavigate();
+
+  const [userId, setUserId] = useState(null);
+
   const [projects, setProjects] = useState([]);
   const [skills, setSkills] = useState([]);
   const [selectedProject, setSelectedProject] = useState(null);
@@ -20,46 +25,81 @@ const ProjectRequiredSkills = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  // Load projects and skills
+  // Check session & set userId
   useEffect(() => {
-    loadProjects();
-    loadSkills();
-  }, []);
+    const storedId = localStorage.getItem("sf_userId");
+    if (!storedId) {
+      navigate("/login");
+    } else {
+      setUserId(storedId);
+    }
+  }, [navigate]);
 
-  const loadProjects = async () => {
+  // Load projects and skills once userId is known
+  useEffect(() => {
+    if (!userId) return;
+
+    const loadAll = async () => {
+      setLoading(true);
+      setError("");
+      try {
+        await Promise.all([loadProjects(userId), loadSkills(userId)]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadAll();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId]);
+
+  const loadProjects = async (uid) => {
+    const effectiveUserId = uid || userId;
+    if (!effectiveUserId) return;
+
     try {
-      const res = await fetch(`${API_BASE_URL}/projects`);
+      const res = await fetch(
+        `${API_BASE_URL}/projects?userId=${effectiveUserId}`
+      );
       const data = await res.json();
-      if (!data.success) throw new Error(data.message);
-      setProjects(data.data);
+      if (!res.ok || !data.success) throw new Error(data.message || "Failed to load projects");
+      setProjects(data.data || []);
     } catch (err) {
-      setError(err.message);
+      console.error(err);
+      setError(err.message || "Failed to load projects");
     }
   };
 
-  const loadSkills = async () => {
+  const loadSkills = async (uid) => {
+    const effectiveUserId = uid || userId;
+    if (!effectiveUserId) return;
+
     try {
-      const res = await fetch(`${API_BASE_URL}/skills`);
+      const res = await fetch(
+        `${API_BASE_URL}/skills?userId=${effectiveUserId}`
+      );
       const data = await res.json();
-      if (!data.success) throw new Error(data.message);
-      setSkills(data.data);
+      if (!res.ok || !data.success) throw new Error(data.message || "Failed to load skills");
+      setSkills(data.data || []);
     } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+      console.error(err);
+      setError(err.message || "Failed to load skills");
     }
   };
 
   const loadRequiredSkills = async (projectId) => {
+    if (!userId || !projectId) return;
+
     try {
       const res = await fetch(
-        `${API_BASE_URL}/projects/${projectId}/required-skills`
+        `${API_BASE_URL}/projects/${projectId}/required-skills?userId=${userId}`
       );
       const data = await res.json();
-      if (!data.success) throw new Error(data.message);
-      setRequiredSkills(data.data);
+      if (!res.ok || !data.success) throw new Error(data.message || "Failed to load required skills");
+      setRequiredSkills(data.data || []);
     } catch (err) {
-      setError(err.message);
+      console.error(err);
+      setError(err.message || "Failed to load required skills");
     }
   };
 
@@ -68,13 +108,19 @@ const ProjectRequiredSkills = () => {
     e.preventDefault();
     if (!selectedProject) return;
 
+    if (!userId) {
+      setError("Session expired. Please log in again.");
+      navigate("/login");
+      return;
+    }
+
     setSaving(true);
     setError("");
     setSuccess("");
 
     try {
       const res = await fetch(
-        `${API_BASE_URL}/projects/${selectedProject}/required-skills`,
+        `${API_BASE_URL}/projects/${selectedProject}/required-skills?userId=${userId}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -86,41 +132,48 @@ const ProjectRequiredSkills = () => {
       );
 
       const data = await res.json();
-      if (!data.success) throw new Error(data.message);
+      if (!res.ok || !data.success) throw new Error(data.message || "Failed to add required skill");
 
       setSuccess("Required skill added!");
       setSkillId("");
       setMinProficiency("1");
       loadRequiredSkills(selectedProject);
     } catch (err) {
-      setError(err.message);
+      console.error(err);
+      setError(err.message || "Failed to add required skill");
     } finally {
       setSaving(false);
     }
   };
 
-  const handleDelete = async (skillId) => {
-  const ok = window.confirm("Remove this required skill?");
-  if (!ok) return;
+  const handleDelete = async (skillIdToRemove) => {
+    const ok = window.confirm("Remove this required skill?");
+    if (!ok) return;
 
-  try {
-    const res = await fetch(
-      `${API_BASE_URL}/projects/${selectedProject}/required-skills/${skillId}`,
-      {
-        method: "DELETE",
-      }
-    );
+    if (!userId) {
+      setError("Session expired. Please log in again.");
+      navigate("/login");
+      return;
+    }
 
-    const data = await res.json();
-    if (!data.success) throw new Error(data.message);
+    try {
+      const res = await fetch(
+        `${API_BASE_URL}/projects/${selectedProject}/required-skills/${skillIdToRemove}?userId=${userId}`,
+        {
+          method: "DELETE",
+        }
+      );
 
-    setSuccess("Required skill removed.");
-    loadRequiredSkills(selectedProject);
-  } catch (err) {
-    setError(err.message);
-  }
-};
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.message || "Failed to remove required skill");
 
+      setSuccess("Required skill removed.");
+      loadRequiredSkills(selectedProject);
+    } catch (err) {
+      console.error(err);
+      setError(err.message || "Failed to remove required skill");
+    }
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-slate-950 text-slate-100">
@@ -131,6 +184,10 @@ const ProjectRequiredSkills = () => {
         <p className="mb-6 text-slate-400">
           Choose a project and define which skills are required, including minimum proficiency levels.
         </p>
+
+        {loading && (
+          <p className="mb-4 text-sm text-slate-400">Loading projects and skills...</p>
+        )}
 
         {/* Error / success messages */}
         {error && (
@@ -154,9 +211,11 @@ const ProjectRequiredSkills = () => {
             value={selectedProject || ""}
             onChange={(e) => {
               const id = e.target.value;
-              setSelectedProject(id);
-              if (id) loadRequiredSkills(id);
+              setSelectedProject(id || null);
               setRequiredSkills([]);
+              setError("");
+              setSuccess("");
+              if (id) loadRequiredSkills(id);
             }}
           >
             <option value="">Choose a project...</option>
@@ -169,7 +228,7 @@ const ProjectRequiredSkills = () => {
         </div>
 
         {selectedProject && (
-          <div className="grid lg:grid-cols-[1.4fr_2fr] gap-10">
+          <div className="grid gap-10 lg:grid-cols-[1.4fr_2fr]">
             {/* Assign Skill */}
             <section className="p-5 border bg-slate-900/60 border-slate-800 rounded-2xl">
               <h2 className="mb-4 text-xl font-semibold">Add Required Skill</h2>
@@ -210,7 +269,7 @@ const ProjectRequiredSkills = () => {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="px-4 py-2 text-white bg-blue-500 rounded-xl hover:bg-blue-600"
+                  className="px-4 py-2 text-white bg-blue-500 rounded-xl hover:bg-blue-600 disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {saving ? "Adding..." : "Add Skill"}
                 </button>
@@ -236,19 +295,18 @@ const ProjectRequiredSkills = () => {
                     <tbody>
                       {requiredSkills.map((rs) => (
                         <tr
-                          key={rs.id}
+                          key={rs.skill_id}
                           className="border-b border-slate-800"
                         >
                           <td className="py-2">{rs.skill_name}</td>
                           <td className="py-2">Level {rs.min_proficiency}</td>
                           <td className="py-2 text-right">
                             <button
-                                className="px-3 py-1 text-xs bg-red-600 rounded-lg hover:bg-red-700"
-                                onClick={() => handleDelete(rs.skill_id)}
-                                >
-                                Remove
-                                </button>
-
+                              className="px-3 py-1 text-xs bg-red-600 rounded-lg hover:bg-red-700"
+                              onClick={() => handleDelete(rs.skill_id)}
+                            >
+                              Remove
+                            </button>
                           </td>
                         </tr>
                       ))}

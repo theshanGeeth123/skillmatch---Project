@@ -1,10 +1,15 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import NavBar3 from "../NavBar/NavBar3";
 import Footer1 from "../Footers/Footer1";
 
 const API_BASE_URL = "http://localhost:5000/api";
 
 const PersonnelSkills = () => {
+  const navigate = useNavigate();
+
+  const [userId, setUserId] = useState(null);
+
   const [personnel, setPersonnel] = useState([]);
   const [skills, setSkills] = useState([]);
   const [selectedPerson, setSelectedPerson] = useState(null);
@@ -19,44 +24,81 @@ const PersonnelSkills = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  // Load personnel & skills on first load
+  // Check session & set userId
   useEffect(() => {
-    loadPersonnel();
-    loadSkills();
-  }, []);
+    const storedId = localStorage.getItem("sf_userId");
+    if (!storedId) {
+      navigate("/login");
+    } else {
+      setUserId(storedId);
+    }
+  }, [navigate]);
 
-  const loadPersonnel = async () => {
+  // Load personnel & skills once userId is known
+  useEffect(() => {
+    if (!userId) return;
+
+    const loadAll = async () => {
+      setLoading(true);
+      setError("");
+      try {
+        await Promise.all([loadPersonnel(userId), loadSkills(userId)]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadAll();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId]);
+
+  const loadPersonnel = async (uid) => {
+    const effectiveUserId = uid || userId;
+    if (!effectiveUserId) return;
+
     try {
-      const res = await fetch(`${API_BASE_URL}/personnel`);
+      const res = await fetch(
+        `${API_BASE_URL}/personnel?userId=${effectiveUserId}`
+      );
       const data = await res.json();
-      if (!res.ok || !data.success) throw new Error(data.message);
-      setPersonnel(data.data);
+      if (!res.ok || !data.success) throw new Error(data.message || "Failed to load personnel");
+      setPersonnel(data.data || []);
     } catch (err) {
-      setError(err.message);
+      console.error(err);
+      setError(err.message || "Failed to load personnel");
     }
   };
 
-  const loadSkills = async () => {
+  const loadSkills = async (uid) => {
+    const effectiveUserId = uid || userId;
+    if (!effectiveUserId) return;
+
     try {
-      const res = await fetch(`${API_BASE_URL}/skills`);
+      const res = await fetch(
+        `${API_BASE_URL}/skills?userId=${effectiveUserId}`
+      );
       const data = await res.json();
-      if (!res.ok || !data.success) throw new Error(data.message);
-      setSkills(data.data);
+      if (!res.ok || !data.success) throw new Error(data.message || "Failed to load skills");
+      setSkills(data.data || []);
     } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+      console.error(err);
+      setError(err.message || "Failed to load skills");
     }
   };
 
   const loadAssignedSkills = async (personId) => {
+    if (!userId || !personId) return;
+
     try {
-      const res = await fetch(`${API_BASE_URL}/personnel/${personId}/skills`);
+      const res = await fetch(
+        `${API_BASE_URL}/personnel/${personId}/skills?userId=${userId}`
+      );
       const data = await res.json();
-      if (!res.ok || !data.success) throw new Error(data.message);
-      setAssignedSkills(data.data);
+      if (!res.ok || !data.success) throw new Error(data.message || "Failed to load assigned skills");
+      setAssignedSkills(data.data || []);
     } catch (err) {
-      setError(err.message);
+      console.error(err);
+      setError(err.message || "Failed to load assigned skills");
     }
   };
 
@@ -64,13 +106,19 @@ const PersonnelSkills = () => {
     e.preventDefault();
     if (!selectedPerson) return;
 
+    if (!userId) {
+      setError("Session expired. Please log in again.");
+      navigate("/login");
+      return;
+    }
+
     setSaving(true);
     setError("");
     setSuccess("");
 
     try {
       const res = await fetch(
-        `${API_BASE_URL}/personnel/${selectedPerson}/skills`,
+        `${API_BASE_URL}/personnel/${selectedPerson}/skills?userId=${userId}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -79,7 +127,7 @@ const PersonnelSkills = () => {
       );
 
       const data = await res.json();
-      if (!res.ok || !data.success) throw new Error(data.message);
+      if (!res.ok || !data.success) throw new Error(data.message || "Failed to assign skill");
 
       setSuccess("Skill assigned successfully!");
       setSkillId("");
@@ -87,28 +135,37 @@ const PersonnelSkills = () => {
 
       loadAssignedSkills(selectedPerson);
     } catch (err) {
-      setError(err.message);
+      console.error(err);
+      setError(err.message || "Failed to assign skill");
     } finally {
       setSaving(false);
     }
   };
 
   const handleDelete = async (assignmentId) => {
+    if (!selectedPerson) return;
     if (!window.confirm("Remove this skill from the person?")) return;
+
+    if (!userId) {
+      setError("Session expired. Please log in again.");
+      navigate("/login");
+      return;
+    }
 
     try {
       const res = await fetch(
-        `${API_BASE_URL}/personnel/skills/${assignmentId}`,
+        `${API_BASE_URL}/personnel/skills/${assignmentId}?userId=${userId}`,
         { method: "DELETE" }
       );
 
       const data = await res.json();
-      if (!res.ok || !data.success) throw new Error(data.message);
+      if (!res.ok || !data.success) throw new Error(data.message || "Failed to remove skill");
 
       setSuccess("Skill removed.");
       loadAssignedSkills(selectedPerson);
     } catch (err) {
-      setError(err.message);
+      console.error(err);
+      setError(err.message || "Failed to remove skill");
     }
   };
 
@@ -126,6 +183,11 @@ const PersonnelSkills = () => {
           Select a person, assign skills with proficiency levels, update, or
           remove them.
         </p>
+
+        {/* Loading indicator */}
+        {loading && (
+          <p className="mb-4 text-sm text-slate-400">Loading data...</p>
+        )}
 
         {/* Error & success messages */}
         {error && (
@@ -149,15 +211,19 @@ const PersonnelSkills = () => {
             value={selectedPerson || ""}
             onChange={(e) => {
               const id = e.target.value;
-              setSelectedPerson(id);
-              if (id) loadAssignedSkills(id);
+              setSelectedPerson(id || null);
               setAssignedSkills([]);
+              setError("");
+              setSuccess("");
+              if (id) {
+                loadAssignedSkills(id);
+              }
             }}
           >
             <option value="">Choose a person...</option>
             {personnel.map((p) => (
               <option key={p.id} value={p.id}>
-                {p.name} — {p.role}
+                {p.name} — {p.role || "No role"}
               </option>
             ))}
           </select>
@@ -165,7 +231,7 @@ const PersonnelSkills = () => {
 
         {/* Only show skill assignment form if a person is selected */}
         {selectedPerson && (
-          <div className="grid lg:grid-cols-[1.3fr_2fr] gap-10">
+          <div className="grid gap-10 lg:grid-cols-[1.3fr_2fr]">
             {/* Form */}
             <section className="p-5 border bg-slate-900/70 border-slate-800 rounded-2xl">
               <h2 className="mb-4 text-xl font-semibold">
@@ -209,7 +275,7 @@ const PersonnelSkills = () => {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="px-4 py-2 text-white bg-blue-500 hover:bg-blue-600 rounded-xl"
+                  className="px-4 py-2 text-white bg-blue-500 rounded-xl hover:bg-blue-600 disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {saving ? "Assigning..." : "Assign Skill"}
                 </button>
@@ -235,14 +301,15 @@ const PersonnelSkills = () => {
                   </thead>
                   <tbody>
                     {assignedSkills.map((a) => (
-                      <tr key={a.assignment_id} className="border-b border-slate-800">
+                      <tr
+                        key={a.assignment_id}
+                        className="border-b border-slate-800"
+                      >
                         <td className="py-2">{a.skill_name}</td>
                         <td className="py-2">Level {a.proficiency}</td>
                         <td className="py-2 text-right">
                           <button
-                            onClick={() =>
-                              handleDelete(a.assignment_id)
-                            }
+                            onClick={() => handleDelete(a.assignment_id)}
                             className="px-3 py-1 text-xs bg-red-600 rounded-lg hover:bg-red-700"
                           >
                             Remove

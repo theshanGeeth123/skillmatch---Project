@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import NavBar3 from "../NavBar/NavBar3";
 import Footer1 from "../Footers/Footer1";
 
@@ -12,6 +13,10 @@ const emptyForm = {
 };
 
 const Personnel = () => {
+  const navigate = useNavigate();
+
+  const [userId, setUserId] = useState(null);
+
   const [personnel, setPersonnel] = useState([]);
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState(null);
@@ -21,13 +26,28 @@ const Personnel = () => {
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
-  // Fetch all personnel
-  const loadPersonnel = async () => {
+  // Check login + set userId
+  useEffect(() => {
+    const storedId = localStorage.getItem("sf_userId");
+    if (!storedId) {
+      navigate("/login");
+    } else {
+      setUserId(storedId);
+    }
+  }, [navigate]);
+
+  // Fetch all personnel for this user
+  const loadPersonnel = async (uid) => {
+    const effectiveUserId = uid || userId;
+    if (!effectiveUserId) return;
+
     try {
       setLoadingList(true);
       setError("");
 
-      const res = await fetch(`${API_BASE_URL}/personnel`);
+      const res = await fetch(
+        `${API_BASE_URL}/personnel?userId=${effectiveUserId}`
+      );
       const data = await res.json();
 
       if (!res.ok || !data.success) {
@@ -43,9 +63,13 @@ const Personnel = () => {
     }
   };
 
+  // Load when userId is ready
   useEffect(() => {
-    loadPersonnel();
-  }, []);
+    if (userId) {
+      loadPersonnel(userId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -56,13 +80,20 @@ const Personnel = () => {
     e.preventDefault();
     setError("");
     setSuccessMessage("");
+
+    if (!userId) {
+      setError("Session expired. Please log in again.");
+      navigate("/login");
+      return;
+    }
+
     setSubmitting(true);
 
     try {
       const method = editingId ? "PUT" : "POST";
       const url = editingId
-        ? `${API_BASE_URL}/personnel/${editingId}`
-        : `${API_BASE_URL}/personnel`;
+        ? `${API_BASE_URL}/personnel/${editingId}?userId=${userId}`
+        : `${API_BASE_URL}/personnel?userId=${userId}`;
 
       const res = await fetch(url, {
         method,
@@ -79,7 +110,9 @@ const Personnel = () => {
       }
 
       setSuccessMessage(
-        editingId ? "Personnel updated successfully." : "Personnel created successfully."
+        editingId
+          ? "Personnel updated successfully."
+          : "Personnel created successfully."
       );
       setForm(emptyForm);
       setEditingId(null);
@@ -115,11 +148,20 @@ const Personnel = () => {
     const ok = window.confirm("Are you sure you want to delete this person?");
     if (!ok) return;
 
+    if (!userId) {
+      setError("Session expired. Please log in again.");
+      navigate("/login");
+      return;
+    }
+
     try {
       setError("");
-      const res = await fetch(`${API_BASE_URL}/personnel/${id}`, {
-        method: "DELETE",
-      });
+      const res = await fetch(
+        `${API_BASE_URL}/personnel/${id}?userId=${userId}`,
+        {
+          method: "DELETE",
+        }
+      );
       const data = await res.json();
 
       if (!res.ok || !data.success) {
@@ -141,10 +183,12 @@ const Personnel = () => {
       <main className="flex-1 px-4 pt-24 pb-16 md:px-10 lg:px-16">
         <header className="flex flex-col gap-2 mb-8 md:flex-row md:items-end md:justify-between">
           <div>
-            <h1 className="text-2xl font-bold md:text-3xl">Personnel Management</h1>
+            <h1 className="text-2xl font-bold md:text-3xl">
+              Personnel Management
+            </h1>
             <p className="max-w-2xl text-sm md:text-base text-slate-300">
-              Manage the people in your consultancy: names, emails, roles, and experience
-              level.
+              Manage the people in your consultancy: names, emails, roles, and
+              experience level.
             </p>
           </div>
         </header>

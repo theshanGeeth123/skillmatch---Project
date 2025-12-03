@@ -3,14 +3,32 @@ import { pool } from "../db/Connection.js";
 const MIN_PROF = 1;
 const MAX_PROF = 5;
 
-// Helper to validate proficiency
+// Validate proficiency
 const isValidProficiency = (value) => {
   const num = Number(value);
   return Number.isInteger(num) && num >= MIN_PROF && num <= MAX_PROF;
 };
 
-// ASSIGN a skill to a personnel
+// Helper: get userId from query
+const getUserIdFromRequest = (req, res) => {
+  const userId = req.query.userId;
+
+  if (!userId) {
+    res.status(400).json({
+      success: false,
+      message: "userId is required for this operation",
+    });
+    return null;
+  }
+
+  return Number(userId);
+};
+
+// ASSIGN skill to personnel (user-scoped)
 export const assignSkillToPersonnel = async (req, res) => {
+  const userId = getUserIdFromRequest(req, res);
+  if (!userId) return;
+
   const { personnelId } = req.params;
   const { skill_id, proficiency } = req.body;
 
@@ -24,38 +42,42 @@ export const assignSkillToPersonnel = async (req, res) => {
   if (!isValidProficiency(proficiency)) {
     return res.status(400).json({
       success: false,
-      message: `proficiency must be an integer between ${MIN_PROF} and ${MAX_PROF}`,
+      message: `proficiency must be between ${MIN_PROF} and ${MAX_PROF}`,
     });
   }
 
   try {
-    // Check personnel exists
+    // Ensure personnel belongs to user
     const [personnelRows] = await pool.query(
-      `SELECT id FROM personnel WHERE id = ?`,
-      [personnelId]
+      `SELECT id FROM personnel WHERE id = ? AND user_id = ?`,
+      [personnelId, userId]
     );
     if (personnelRows.length === 0) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Personnel not found" });
+      return res.status(404).json({
+        success: false,
+        message: "Personnel not found or does not belong to this user",
+      });
     }
 
-    // Check skill exists
-    const [skillRows] = await pool.query(`SELECT id FROM skills WHERE id = ?`, [
-      skill_id,
-    ]);
+    // Ensure skill belongs to user
+    const [skillRows] = await pool.query(
+      `SELECT id FROM skills WHERE id = ? AND user_id = ?`,
+      [skill_id, userId]
+    );
     if (skillRows.length === 0) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Skill not found" });
+      return res.status(404).json({
+        success: false,
+        message: "Skill not found or does not belong to this user",
+      });
     }
 
-    // Insert or update (upsert-like behavior)
-    // First try insert
+    // Try insert (if duplicate, update instead)
     try {
       const [result] = await pool.query(
-        `INSERT INTO personnel_skills (personnel_id, skill_id, proficiency)
-         VALUES (?, ?, ?)`,
+        `
+        INSERT INTO personnel_skills (personnel_id, skill_id, proficiency)
+        VALUES (?, ?, ?)
+        `,
         [personnelId, skill_id, proficiency]
       );
 
@@ -69,12 +91,13 @@ export const assignSkillToPersonnel = async (req, res) => {
         },
       });
     } catch (error) {
-      // If duplicate (already has this skill), then update proficiency
       if (error.code === "ER_DUP_ENTRY") {
         await pool.query(
-          `UPDATE personnel_skills
-           SET proficiency = ?
-           WHERE personnel_id = ? AND skill_id = ?`,
+          `
+          UPDATE personnel_skills
+          SET proficiency = ?
+          WHERE personnel_id = ? AND skill_id = ?
+          `,
           [proficiency, personnelId, skill_id]
         );
 
@@ -93,17 +116,34 @@ export const assignSkillToPersonnel = async (req, res) => {
     }
   } catch (error) {
     console.error("Error assigning skill to personnel:", error);
-    return res
-      .status(500)
-      .json({ success: false, message: "Internal server error" });
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
   }
 };
 
-// GET all skills of a personnel
+// GET skills of personnel (only user's personnel)
 export const getSkillsForPersonnel = async (req, res) => {
+  const userId = getUserIdFromRequest(req, res);
+  if (!userId) return;
+
   const { personnelId } = req.params;
 
   try {
+    // Ensure personnel belongs to user
+    const [personnelRows] = await pool.query(
+      `SELECT id FROM personnel WHERE id = ? AND user_id = ?`,
+      [personnelId, userId]
+    );
+    if (personnelRows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Personnel not found or does not belong to this user",
+      });
+    }
+
+    // Fetch assigned skills
     const [rows] = await pool.query(
       `
       SELECT 
@@ -119,31 +159,56 @@ export const getSkillsForPersonnel = async (req, res) => {
       [personnelId]
     );
 
-    return res.status(200).json({
-      success: true,
-      data: rows,
-    });
+    return res.status(200).json({ success: true, data: rows });
   } catch (error) {
     console.error("Error getting skills for personnel:", error);
-    return res
-      .status(500)
-      .json({ success: false, message: "Internal server error" });
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
   }
 };
 
-// UPDATE proficiency for a given personnel + skill
+// UPDATE proficiency (user-scoped)
 export const updatePersonnelSkill = async (req, res) => {
+  const userId = getUserIdFromRequest(req, res);
+  if (!userId) return;
+
   const { personnelId, skillId } = req.params;
   const { proficiency } = req.body;
 
   if (!isValidProficiency(proficiency)) {
     return res.status(400).json({
       success: false,
-      message: `proficiency must be an integer between ${MIN_PROF} and ${MAX_PROF}`,
+      message: `proficiency must be between ${MIN_PROF} and ${MAX_PROF}`,
     });
   }
 
   try {
+    // Ensure personnel belongs to user
+    const [personnelRows] = await pool.query(
+      `SELECT id FROM personnel WHERE id = ? AND user_id = ?`,
+      [personnelId, userId]
+    );
+    if (personnelRows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Personnel not found or does not belong to this user",
+      });
+    }
+
+    // Ensure skill belongs to user
+    const [skillRows] = await pool.query(
+      `SELECT id FROM skills WHERE id = ? AND user_id = ?`,
+      [skillId, userId]
+    );
+    if (skillRows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Skill not found or does not belong to this user",
+      });
+    }
+
     const [result] = await pool.query(
       `
       UPDATE personnel_skills
@@ -170,17 +235,45 @@ export const updatePersonnelSkill = async (req, res) => {
     });
   } catch (error) {
     console.error("Error updating personnel skill:", error);
-    return res
-      .status(500)
-      .json({ success: false, message: "Internal server error" });
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
   }
 };
 
-// DELETE assignment
+// DELETE skill assignment (user-scoped)
 export const deletePersonnelSkill = async (req, res) => {
+  const userId = getUserIdFromRequest(req, res);
+  if (!userId) return;
+
   const { personnelId, skillId } = req.params;
 
   try {
+    // Ensure personnel belongs to user
+    const [personnelRows] = await pool.query(
+      `SELECT id FROM personnel WHERE id = ? AND user_id = ?`,
+      [personnelId, userId]
+    );
+    if (personnelRows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Personnel not found or does not belong to this user",
+      });
+    }
+
+    // Ensure skill belongs to user
+    const [skillRows] = await pool.query(
+      `SELECT id FROM skills WHERE id = ? AND user_id = ?`,
+      [skillId, userId]
+    );
+    if (skillRows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Skill not found or does not belong to this user",
+      });
+    }
+
     const [result] = await pool.query(
       `
       DELETE FROM personnel_skills
@@ -202,8 +295,9 @@ export const deletePersonnelSkill = async (req, res) => {
     });
   } catch (error) {
     console.error("Error deleting personnel skill:", error);
-    return res
-      .status(500)
-      .json({ success: false, message: "Internal server error" });
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
   }
 };

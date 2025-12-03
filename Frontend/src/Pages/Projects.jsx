@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import NavBar2 from "../NavBar/NavBar2";
 import Footer1 from "../Footers/Footer1";
 
@@ -13,6 +14,9 @@ const emptyForm = {
 };
 
 const Projects = () => {
+  const navigate = useNavigate();
+  const [userId, setUserId] = useState(null);
+
   const [projects, setProjects] = useState([]);
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState(null);
@@ -23,13 +27,28 @@ const Projects = () => {
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
-  // Load all projects
-  const loadProjects = async () => {
+  // Check login + set userId
+  useEffect(() => {
+    const storedId = localStorage.getItem("sf_userId");
+    if (!storedId) {
+      navigate("/login");
+    } else {
+      setUserId(storedId);
+    }
+  }, [navigate]);
+
+  // Load all projects for this user
+  const loadProjects = async (uid) => {
+    const effectiveUserId = uid || userId;
+    if (!effectiveUserId) return;
+
     try {
       setLoadingList(true);
       setError("");
 
-      const res = await fetch(`${API_BASE_URL}/projects`);
+      const res = await fetch(
+        `${API_BASE_URL}/projects?userId=${effectiveUserId}`
+      );
       const data = await res.json();
 
       if (!res.ok || !data.success) {
@@ -46,8 +65,11 @@ const Projects = () => {
   };
 
   useEffect(() => {
-    loadProjects();
-  }, []);
+    if (userId) {
+      loadProjects(userId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -60,11 +82,17 @@ const Projects = () => {
     setError("");
     setSuccessMessage("");
 
+    if (!userId) {
+      setError("Session expired. Please log in again.");
+      navigate("/login");
+      return;
+    }
+
     try {
       const method = editingId ? "PUT" : "POST";
       const url = editingId
-        ? `${API_BASE_URL}/projects/${editingId}`
-        : `${API_BASE_URL}/projects`;
+        ? `${API_BASE_URL}/projects/${editingId}?userId=${userId}`
+        : `${API_BASE_URL}/projects?userId=${userId}`;
 
       const res = await fetch(url, {
         method,
@@ -81,7 +109,9 @@ const Projects = () => {
       }
 
       setSuccessMessage(
-        editingId ? "Project updated successfully." : "Project created successfully."
+        editingId
+          ? "Project updated successfully."
+          : "Project created successfully."
       );
       setForm(emptyForm);
       setEditingId(null);
@@ -98,7 +128,9 @@ const Projects = () => {
     setForm({
       name: project.name || "",
       description: project.description || "",
-      start_date: project.start_date ? project.start_date.substring(0, 10) : "",
+      start_date: project.start_date
+        ? project.start_date.substring(0, 10)
+        : "",
       end_date: project.end_date ? project.end_date.substring(0, 10) : "",
       status: project.status || "Planning",
     });
@@ -118,11 +150,20 @@ const Projects = () => {
     const ok = window.confirm("Are you sure you want to delete this project?");
     if (!ok) return;
 
+    if (!userId) {
+      setError("Session expired. Please log in again.");
+      navigate("/login");
+      return;
+    }
+
     try {
       setError("");
-      const res = await fetch(`${API_BASE_URL}/projects/${id}`, {
-        method: "DELETE",
-      });
+      const res = await fetch(
+        `${API_BASE_URL}/projects/${id}?userId=${userId}`,
+        {
+          method: "DELETE",
+        }
+      );
       const data = await res.json();
 
       if (!res.ok || !data.success) {
@@ -144,9 +185,12 @@ const Projects = () => {
       <main className="flex-1 px-4 pt-24 pb-16 md:px-10 lg:px-16">
         <header className="flex flex-col gap-2 mb-8 md:flex-row md:items-end md:justify-between">
           <div>
-            <h1 className="text-2xl font-bold md:text-3xl">Project Management</h1>
+            <h1 className="text-2xl font-bold md:text-3xl">
+              Project Management
+            </h1>
             <p className="max-w-2xl text-sm md:text-base text-slate-300">
-              Create and manage projects, define timeframes, and track their status.
+              Create and manage projects, define timeframes, and track their
+              status.
             </p>
           </div>
         </header>
@@ -189,7 +233,10 @@ const Projects = () => {
               </div>
 
               <div>
-                <label className="block mb-1 text-slate-300" htmlFor="description">
+                <label
+                  className="block mb-1 text-slate-300"
+                  htmlFor="description"
+                >
                   Description
                 </label>
                 <textarea
@@ -205,7 +252,10 @@ const Projects = () => {
 
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div>
-                  <label className="block mb-1 text-slate-300" htmlFor="start_date">
+                  <label
+                    className="block mb-1 text-slate-300"
+                    htmlFor="start_date"
+                  >
                     Start Date
                   </label>
                   <input
@@ -219,7 +269,10 @@ const Projects = () => {
                 </div>
 
                 <div>
-                  <label className="block mb-1 text-slate-300" htmlFor="end_date">
+                  <label
+                    className="block mb-1 text-slate-300"
+                    htmlFor="end_date"
+                  >
                     End Date
                   </label>
                   <input
@@ -266,15 +319,15 @@ const Projects = () => {
                     : "Create Project"}
                 </button>
 
-                {editingId && (
-                  <button
-                    type="button"
-                    onClick={handleCancelEdit}
-                    className="px-4 py-2 text-sm border rounded-xl border-slate-600 text-slate-200 hover:bg-slate-800"
-                  >
-                    Cancel
-                  </button>
-                )}
+              {editingId && (
+                <button
+                  type="button"
+                  onClick={handleCancelEdit}
+                  className="px-4 py-2 text-sm border rounded-xl border-slate-600 text-slate-200 hover:bg-slate-800"
+                >
+                  Cancel
+                </button>
+              )}
               </div>
             </form>
           </section>

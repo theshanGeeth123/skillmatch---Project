@@ -26,26 +26,36 @@ const initDatabase = async () => {
     )
   `;
 
-  // 1) Personnel table
+  // 1) Personnel table (scoped by user_id)
   const createPersonnelTableSQL = `
     CREATE TABLE IF NOT EXISTS personnel (
       id INT AUTO_INCREMENT PRIMARY KEY,
+      user_id INT NOT NULL,
       name VARCHAR(100) NOT NULL,
-      email VARCHAR(150) NOT NULL UNIQUE,
+      email VARCHAR(150) NOT NULL,
       role VARCHAR(100),
       experience_level ENUM('Junior','Mid-Level','Senior') NOT NULL,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      CONSTRAINT fk_personnel_user
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+      CONSTRAINT uq_personnel_user_email
+        UNIQUE (user_id, email)
     )
   `;
 
-  // 2) Skills table
+  // 2) Skills table (scoped by user_id)
   const createSkillsTableSQL = `
     CREATE TABLE IF NOT EXISTS skills (
       id INT AUTO_INCREMENT PRIMARY KEY,
+      user_id INT NOT NULL,
       name VARCHAR(100) NOT NULL,
       category ENUM('Programming Language','Framework','Tool','Soft Skill') NOT NULL,
       description TEXT,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      CONSTRAINT fk_skills_user
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+      CONSTRAINT uq_skills_user_name
+        UNIQUE (user_id, name)
     )
   `;
 
@@ -58,25 +68,30 @@ const initDatabase = async () => {
       proficiency TINYINT NOT NULL,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       UNIQUE KEY unique_personnel_skill (personnel_id, skill_id),
-      CONSTRAINT fk_personnel
+      CONSTRAINT fk_ps_personnel
         FOREIGN KEY (personnel_id) REFERENCES personnel(id)
         ON DELETE CASCADE,
-      CONSTRAINT fk_skill
+      CONSTRAINT fk_ps_skill
         FOREIGN KEY (skill_id) REFERENCES skills(id)
         ON DELETE CASCADE
     )
   `;
 
-  // 4) Projects table
+  // 4) Projects table (scoped by user_id)
   const createProjectsTableSQL = `
     CREATE TABLE IF NOT EXISTS projects (
       id INT AUTO_INCREMENT PRIMARY KEY,
+      user_id INT NOT NULL,
       name VARCHAR(150) NOT NULL,
       description TEXT,
       start_date DATE,
       end_date DATE,
       status ENUM('Planning','Active','Completed') NOT NULL DEFAULT 'Planning',
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      CONSTRAINT fk_projects_user
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+      CONSTRAINT uq_projects_user_name
+        UNIQUE (user_id, name)
     )
   `;
 
@@ -89,10 +104,10 @@ const initDatabase = async () => {
       min_proficiency TINYINT NOT NULL,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       UNIQUE KEY unique_project_skill (project_id, skill_id),
-      CONSTRAINT fk_project
+      CONSTRAINT fk_prs_project
         FOREIGN KEY (project_id) REFERENCES projects(id)
         ON DELETE CASCADE,
-      CONSTRAINT fk_project_skill
+      CONSTRAINT fk_prs_skill
         FOREIGN KEY (skill_id) REFERENCES skills(id)
         ON DELETE CASCADE
     )
@@ -121,8 +136,6 @@ const initDatabase = async () => {
     throw error;
   }
 };
-
-
 
 // NOTE: name kept as connectToDatabse to match your existing imports
 const connectToDatabse = async () => {

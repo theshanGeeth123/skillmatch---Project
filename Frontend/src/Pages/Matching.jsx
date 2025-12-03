@@ -1,10 +1,15 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import NavBar2 from "../NavBar/NavBar2";
 import Footer1 from "../Footers/Footer1";
 
 const API_BASE_URL = "http://localhost:5000/api";
 
 const Matching = () => {
+  const navigate = useNavigate();
+
+  const [userId, setUserId] = useState(null);
+
   const [projects, setProjects] = useState([]);
   const [selectedProject, setSelectedProject] = useState("");
 
@@ -15,16 +20,34 @@ const Matching = () => {
   const [error, setError] = useState("");
   const [info, setInfo] = useState("");
 
-  // Load projects once
+  // On mount: check session
   useEffect(() => {
+    const storedId = localStorage.getItem("sf_userId");
+    if (!storedId) {
+      navigate("/login");
+    } else {
+      setUserId(storedId);
+    }
+  }, [navigate]);
+
+  // Load projects once we know userId
+  useEffect(() => {
+    if (!userId) return;
+
     const loadProjects = async () => {
       try {
         setLoadingProjects(true);
-        const res = await fetch(`${API_BASE_URL}/projects`);
+        setError("");
+
+        const res = await fetch(
+          `${API_BASE_URL}/projects?userId=${userId}`
+        );
         const data = await res.json();
+
         if (!res.ok || !data.success) {
           throw new Error(data.message || "Failed to load projects");
         }
+
         setProjects(data.data || []);
       } catch (err) {
         console.error(err);
@@ -35,7 +58,7 @@ const Matching = () => {
     };
 
     loadProjects();
-  }, []);
+  }, [userId]);
 
   const runMatching = async () => {
     if (!selectedProject) {
@@ -43,14 +66,20 @@ const Matching = () => {
       return;
     }
 
+    if (!userId) {
+      setError("Session expired. Please log in again.");
+      navigate("/login");
+      return;
+    }
+
     setError("");
     setInfo("");
     setLoadingMatches(true);
+    setMatches([]);
 
     try {
-      // ⚠ If your backend path is different, update this URL
       const res = await fetch(
-        `${API_BASE_URL}/projects/${selectedProject}/matches`
+        `${API_BASE_URL}/projects/${selectedProject}/matches?userId=${userId}`
       );
       const data = await res.json();
 
@@ -58,9 +87,11 @@ const Matching = () => {
         throw new Error(data.message || "Failed to run matching");
       }
 
-      setMatches(data.data || []);
-      if ((data.data || []).length === 0) {
-        setInfo("No matching personnel found for this project yet.");
+      const result = data.data || [];
+      setMatches(result);
+
+      if (result.length === 0) {
+        setInfo("No personnel meet all required skills for this project yet.");
       }
     } catch (err) {
       console.error(err);
@@ -70,10 +101,10 @@ const Matching = () => {
     }
   };
 
-  // Helper to render match score nicely if backend sends it
-  const formatScore = (score) => {
-    if (score === null || score === undefined) return "-";
-    return `${Math.round(score)}%`;
+  // Use backend's match_percentage
+  const formatScore = (percentage) => {
+    if (percentage === null || percentage === undefined) return "-";
+    return `${Math.round(percentage)}%`;
   };
 
   return (
@@ -177,6 +208,7 @@ const Matching = () => {
                       key={m.personnel_id}
                       className="align-top border-b border-slate-800 last:border-none"
                     >
+                      {/* Person */}
                       <td className="py-2 pr-3">
                         <div className="font-medium">{m.name}</div>
                         <div className="text-xs text-slate-400">
@@ -184,6 +216,7 @@ const Matching = () => {
                         </div>
                       </td>
 
+                      {/* Role + experience */}
                       <td className="py-2 pr-3 text-slate-300">
                         <div>{m.role || "-"}</div>
                         <div className="text-xs text-slate-400">
@@ -191,14 +224,20 @@ const Matching = () => {
                         </div>
                       </td>
 
+                      {/* Skills */}
                       <td className="py-2 pr-3 text-slate-200">
                         {m.matched_skills && m.matched_skills.length > 0 ? (
                           <ul className="space-y-1">
                             {m.matched_skills.map((s) => (
-                              <li key={s.skill_id} className="text-xs md:text-[13px]">
-                                <span className="font-medium">{s.skill_name}</span>{" "}
-                                — required L{s.required_level}, person L
-                                {s.person_level}
+                              <li
+                                key={s.skill_id}
+                                className="text-xs md:text-[13px]"
+                              >
+                                <span className="font-medium">
+                                  {s.skill_name}
+                                </span>{" "}
+                                — required L{s.required_min}, person L
+                                {s.proficiency}
                               </li>
                             ))}
                           </ul>
@@ -209,8 +248,9 @@ const Matching = () => {
                         )}
                       </td>
 
+                      {/* Score */}
                       <td className="py-2 font-semibold text-right">
-                        {formatScore(m.match_score)}
+                        {formatScore(m.match_percentage)}
                       </td>
                     </tr>
                   ))}

@@ -8,8 +8,26 @@ const isValidProficiency = (value) => {
   return Number.isInteger(num) && num >= MIN_PROF && num <= MAX_PROF;
 };
 
-// ADD or UPDATE required skill for project
+// Helper: get userId from query
+const getUserIdFromRequest = (req, res) => {
+  const userId = req.query.userId;
+
+  if (!userId) {
+    res.status(400).json({
+      success: false,
+      message: "userId is required for this operation",
+    });
+    return null;
+  }
+
+  return Number(userId);
+};
+
+// ADD or UPDATE required skill for project (user-scoped)
 export const addRequiredSkillToProject = async (req, res) => {
+  const userId = getUserIdFromRequest(req, res);
+  if (!userId) return;
+
   const { projectId } = req.params;
   const { skill_id, min_proficiency } = req.body;
 
@@ -28,26 +46,28 @@ export const addRequiredSkillToProject = async (req, res) => {
   }
 
   try {
-    // Check project exists
+    // Check project exists AND belongs to current user
     const [projectRows] = await pool.query(
-      `SELECT id FROM projects WHERE id = ?`,
-      [projectId]
+      `SELECT id FROM projects WHERE id = ? AND user_id = ?`,
+      [projectId, userId]
     );
     if (projectRows.length === 0) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Project not found" });
+      return res.status(404).json({
+        success: false,
+        message: "Project not found or does not belong to this user",
+      });
     }
 
-    // Check skill exists
+    // Check skill exists AND belongs to current user
     const [skillRows] = await pool.query(
-      `SELECT id FROM skills WHERE id = ?`,
-      [skill_id]
+      `SELECT id FROM skills WHERE id = ? AND user_id = ?`,
+      [skill_id, userId]
     );
     if (skillRows.length === 0) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Skill not found" });
+      return res.status(404).json({
+        success: false,
+        message: "Skill not found or does not belong to this user",
+      });
     }
 
     // Try insert
@@ -102,11 +122,26 @@ export const addRequiredSkillToProject = async (req, res) => {
   }
 };
 
-// GET required skills for a project
+// GET required skills for a project (only if project belongs to user)
 export const getRequiredSkillsForProject = async (req, res) => {
+  const userId = getUserIdFromRequest(req, res);
+  if (!userId) return;
+
   const { projectId } = req.params;
 
   try {
+    // Ensure project belongs to user
+    const [projectRows] = await pool.query(
+      `SELECT id FROM projects WHERE id = ? AND user_id = ?`,
+      [projectId, userId]
+    );
+    if (projectRows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Project not found or does not belong to this user",
+      });
+    }
+
     const [rows] = await pool.query(
       `
       SELECT 
@@ -134,8 +169,11 @@ export const getRequiredSkillsForProject = async (req, res) => {
   }
 };
 
-// UPDATE required skill min proficiency
+// UPDATE required skill min proficiency (user-scoped)
 export const updateProjectRequiredSkill = async (req, res) => {
+  const userId = getUserIdFromRequest(req, res);
+  if (!userId) return;
+
   const { projectId, skillId } = req.params;
   const { min_proficiency } = req.body;
 
@@ -147,6 +185,30 @@ export const updateProjectRequiredSkill = async (req, res) => {
   }
 
   try {
+    // Ensure project belongs to user
+    const [projectRows] = await pool.query(
+      `SELECT id FROM projects WHERE id = ? AND user_id = ?`,
+      [projectId, userId]
+    );
+    if (projectRows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Project not found or does not belong to this user",
+      });
+    }
+
+    // Ensure skill belongs to user
+    const [skillRows] = await pool.query(
+      `SELECT id FROM skills WHERE id = ? AND user_id = ?`,
+      [skillId, userId]
+    );
+    if (skillRows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Skill not found or does not belong to this user",
+      });
+    }
+
     const [result] = await pool.query(
       `
       UPDATE project_required_skills
@@ -179,11 +241,38 @@ export const updateProjectRequiredSkill = async (req, res) => {
   }
 };
 
-// DELETE required skill
+// DELETE required skill (user-scoped)
 export const deleteProjectRequiredSkill = async (req, res) => {
+  const userId = getUserIdFromRequest(req, res);
+  if (!userId) return;
+
   const { projectId, skillId } = req.params;
 
   try {
+    // Ensure project belongs to user
+    const [projectRows] = await pool.query(
+      `SELECT id FROM projects WHERE id = ? AND user_id = ?`,
+      [projectId, userId]
+    );
+    if (projectRows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Project not found or does not belong to this user",
+      });
+    }
+
+    // Ensure skill belongs to user
+    const [skillRows] = await pool.query(
+      `SELECT id FROM skills WHERE id = ? AND user_id = ?`,
+      [skillId, userId]
+    );
+    if (skillRows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Skill not found or does not belong to this user",
+      });
+    }
+
     const [result] = await pool.query(
       `
       DELETE FROM project_required_skills

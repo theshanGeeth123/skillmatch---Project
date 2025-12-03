@@ -7,8 +7,26 @@ const VALID_CATEGORIES = [
   "Soft Skill",
 ];
 
-// CREATE skill
+// Helper to get userId from query and validate
+const getUserIdFromRequest = (req, res) => {
+  const userId = req.query.userId;
+
+  if (!userId) {
+    res.status(400).json({
+      success: false,
+      message: "userId is required for this operation",
+    });
+    return null;
+  }
+
+  return Number(userId);
+};
+
+// CREATE skill (scoped to user)
 export const createSkill = async (req, res) => {
+  const userId = getUserIdFromRequest(req, res);
+  if (!userId) return;
+
   const { name, category, description } = req.body;
 
   if (!name || !category) {
@@ -27,14 +45,18 @@ export const createSkill = async (req, res) => {
 
   try {
     const [result] = await pool.query(
-      `INSERT INTO skills (name, category, description) VALUES (?, ?, ?)`,
-      [name, category, description || null]
+      `
+      INSERT INTO skills (user_id, name, category, description)
+      VALUES (?, ?, ?, ?)
+      `,
+      [userId, name, category, description || null]
     );
 
     return res.status(201).json({
       success: true,
       data: {
         id: result.insertId,
+        user_id: userId,
         name,
         category,
         description: description || null,
@@ -48,11 +70,20 @@ export const createSkill = async (req, res) => {
   }
 };
 
-// GET all skills
+// GET all skills for current user
 export const getAllSkills = async (req, res) => {
+  const userId = getUserIdFromRequest(req, res);
+  if (!userId) return;
+
   try {
     const [rows] = await pool.query(
-      `SELECT id, name, category, description, created_at FROM skills`
+      `
+      SELECT id, user_id, name, category, description, created_at
+      FROM skills
+      WHERE user_id = ?
+      ORDER BY created_at DESC
+      `,
+      [userId]
     );
 
     return res.status(200).json({
@@ -67,14 +98,21 @@ export const getAllSkills = async (req, res) => {
   }
 };
 
-// GET skill by id
+// GET skill by id (scoped to user)
 export const getSkillById = async (req, res) => {
+  const userId = getUserIdFromRequest(req, res);
+  if (!userId) return;
+
   const { id } = req.params;
 
   try {
     const [rows] = await pool.query(
-      `SELECT id, name, category, description, created_at FROM skills WHERE id = ?`,
-      [id]
+      `
+      SELECT id, user_id, name, category, description, created_at
+      FROM skills
+      WHERE id = ? AND user_id = ?
+      `,
+      [id, userId]
     );
 
     if (rows.length === 0) {
@@ -95,8 +133,11 @@ export const getSkillById = async (req, res) => {
   }
 };
 
-// UPDATE skill
+// UPDATE skill (scoped to user)
 export const updateSkill = async (req, res) => {
+  const userId = getUserIdFromRequest(req, res);
+  if (!userId) return;
+
   const { id } = req.params;
   const { name, category, description } = req.body;
 
@@ -109,8 +150,8 @@ export const updateSkill = async (req, res) => {
 
   try {
     const [existing] = await pool.query(
-      `SELECT * FROM skills WHERE id = ?`,
-      [id]
+      `SELECT * FROM skills WHERE id = ? AND user_id = ?`,
+      [id, userId]
     );
 
     if (existing.length === 0) {
@@ -126,13 +167,17 @@ export const updateSkill = async (req, res) => {
     };
 
     await pool.query(
-      `UPDATE skills SET name = ?, category = ?, description = ? WHERE id = ?`,
-      [updated.name, updated.category, updated.description, id]
+      `
+      UPDATE skills
+      SET name = ?, category = ?, description = ?
+      WHERE id = ? AND user_id = ?
+      `,
+      [updated.name, updated.category, updated.description, id, userId]
     );
 
     return res.status(200).json({
       success: true,
-      data: { id: Number(id), ...updated },
+      data: { id: Number(id), user_id: userId, ...updated },
     });
   } catch (error) {
     console.error("Error updating skill:", error);
@@ -142,12 +187,18 @@ export const updateSkill = async (req, res) => {
   }
 };
 
-// DELETE skill
+// DELETE skill (scoped to user)
 export const deleteSkill = async (req, res) => {
+  const userId = getUserIdFromRequest(req, res);
+  if (!userId) return;
+
   const { id } = req.params;
 
   try {
-    const [result] = await pool.query(`DELETE FROM skills WHERE id = ?`, [id]);
+    const [result] = await pool.query(
+      `DELETE FROM skills WHERE id = ? AND user_id = ?`,
+      [id, userId]
+    );
 
     if (result.affectedRows === 0) {
       return res
