@@ -6,7 +6,9 @@ import PImage1 from "../Images/person1.avif";
 import PImage2 from "../Images/person2.jpg";
 import PImage3 from "../Images/person3.jpg";
 
+
 import "@fortawesome/fontawesome-free/css/all.min.css";
+
 
 import AOS from "aos";
 import "aos/dist/aos.css";
@@ -20,11 +22,19 @@ const Home = () => {
   }, []);
 
   return (
+    
+    <>
+    
+    
+    
     <div
-      className="min-h-screen w-full bg-cover bg-center bg-fixed  "
+      className="w-full min-h-screen bg-fixed bg-center bg-cover "
       style={{ backgroundImage: `url(${BGImage})` }}
     >
+      
+      
       <NavBar1 />
+      
 
       <div
         className="
@@ -32,7 +42,7 @@ const Home = () => {
           flex flex-col justify-center items-center text-center px-6  "
       >
         <h1
-          className="text-4xl md:text-5xl font-extrabold text-white tracking-wide"
+          className="text-4xl font-extrabold tracking-wide text-white md:text-5xl"
           data-aos="fade-up"
         >
           Skill Fusion
@@ -56,20 +66,19 @@ const Home = () => {
               behavior: "smooth",
             });
           }}
-          className="mt-10 px-8 py-3 bg-black/80 hover:bg-black text-white rounded-xl 
-    text-base md:text-lg font-semibold shadow-md transition-all duration-300 "
+          className="px-8 py-3 mt-10 text-base font-semibold text-white transition-all duration-300 shadow-md bg-black/80 hover:bg-black rounded-xl md:text-lg "
         >
           Explore Platform
         </button>
       </div>
 
-      <div id="section2" className="bg-black/45 py-20 ">
-        <div className="max-w-7xl mx-auto px-6 text-white">
+      <div id="section2" className="py-20 bg-black/45 ">
+        <div className="px-6 mx-auto text-white max-w-7xl">
           <div className="text-center mb-14">
-            <h2 className="text-3xl md:text-4xl font-bold tracking-wide">
+            <h2 className="text-3xl font-bold tracking-wide md:text-4xl">
               Our Services
             </h2>
-            <p className="mt-4 text-gray-300 max-w-2xl mx-auto text-sm md:text-base">
+            <p className="max-w-2xl mx-auto mt-4 text-sm text-gray-300 md:text-base">
               Skill Fusion provides an integrated platform to manage personnel,
               skills, and project requirements with precision and clarity.
             </p>
@@ -80,17 +89,17 @@ const Home = () => {
               data-aos="flip-up"
               data-aos-delay="100"
               className="bg-white/10 backdrop-blur-md border border-white/20 
-    rounded-2xl p-6 shadow-lg 
-    transition-all duration-500
-    hover:-translate-y-3 hover:scale-[1.03]
-    hover:shadow-2xl hover:bg-white/20
-    hover:border-white/40 cursor-pointer
+                    rounded-2xl p-6 shadow-lg 
+                    transition-all duration-500
+                    hover:-translate-y-3 hover:scale-[1.03]
+                    hover:shadow-2xl hover:bg-white/20
+                    hover:border-white/40 cursor-pointer
                       "
             >
-              <h3 className="text-xl font-semibold mb-3">
+              <h3 className="mb-3 text-xl font-semibold">
                 Personnel Management
               </h3>
-              <p className="text-gray-300 text-sm">
+              <p className="text-sm text-gray-300">
                 Maintain detailed personnel profiles to organize teams and track
                 availability for projects.
               </p>
@@ -106,10 +115,10 @@ const Home = () => {
     hover:shadow-2xl hover:bg-white/20
     hover:border-white/40 cursor-pointer"
             >
-              <h3 className="text-xl font-semibold mb-3">
+              <h3 className="mb-3 text-xl font-semibold">
                 Find Relevant Team Members
               </h3>
-              <p className="text-gray-300 text-sm">
+              <p className="text-sm text-gray-300">
                 Automatically match the best-suited team members to specific
                 projects based on skill alignment.
               </p>
@@ -125,10 +134,10 @@ const Home = () => {
                 hover:shadow-2xl hover:bg-white/20
                 hover:border-white/40 cursor-pointer"
             >
-              <h3 className="text-xl font-semibold mb-3">
+              <h3 className="mb-3 text-xl font-semibold">
                 Manage Member Skills
               </h3>
-              <p className="text-gray-300 text-sm">
+              <p className="text-sm text-gray-300">
                 Keep track of employee skills and experience levels to maintain
                 a powerful skills database.
               </p>
@@ -144,8 +153,8 @@ const Home = () => {
                 hover:shadow-2xl hover:bg-white/20
                 hover:border-white/40 cursor-pointer"
             >
-              <h3 className="text-xl font-semibold mb-3">Charts & Analytics</h3>
-              <p className="text-gray-300 text-sm">
+              <h3 className="mb-3 text-xl font-semibold">Charts & Analytics</h3>
+              <p className="text-sm text-gray-300">
                 Gain insights using visual analytics to identify skill gaps and
                 team strengths instantly.
               </p>
@@ -154,89 +163,89 @@ const Home = () => {
         </div>
       </div>
 
-      <div className="bg-black/45 py-20">
-        <div className="max-w-6xl mx-auto px-6 text-white">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold tracking-wide">
+      <div className="py-20 bg-black/45">
+        <div className="max-w-6xl px-6 mx-auto text-white">
+          <div className="mb-12 text-center">
+            <h2 className="text-3xl font-bold tracking-wide md:text-4xl">
               What Our Users Say
             </h2>
-            <p className="mt-4 text-gray-300 max-w-2xl mx-auto text-sm md:text-base">
+            <p className="max-w-2xl mx-auto mt-4 text-sm text-gray-300 md:text-base">
               Teams use Skill Fusion to streamline projects, understand skills,
               and build high-performing teams with confidence.
             </p>
           </div>
 
           <div className="grid gap-8 md:grid-cols-3">
-            <div className="relative bg-white/5 border border-white/10 rounded-2xl p-8 pt-14 shadow-lg backdrop-blur-md">
-              <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-16 h-16 rounded-full overflow-hidden border-4 border-black/60">
+            <div className="relative p-8 border shadow-lg bg-white/5 border-white/10 rounded-2xl pt-14 backdrop-blur-md">
+              <div className="absolute w-16 h-16 overflow-hidden -translate-x-1/2 border-4 rounded-full -top-10 left-1/2 border-black/60">
                 <img
                   src={PImage1}
                   alt="User 1"
-                  className="w-full h-full object-cover"
+                  className="object-cover w-full h-full"
                 />
               </div>
 
-              <p className="text-gray-200 text-sm md:text-base leading-relaxed mb-6">
+              <p className="mb-6 text-sm leading-relaxed text-gray-200 md:text-base">
                 “Skill Fusion helps us quickly see who is available and which
                 skills we have in the team. Assigning people to projects is now
                 effortless.”
               </p>
 
               <div className="text-center">
-                <div className="text-gray-400 text-sm mb-1">
+                <div className="mb-1 text-sm text-gray-400">
                   NovaTech Solutions
                 </div>
-                <div className="font-semibold text-sm md:text-base">
+                <div className="text-sm font-semibold md:text-base">
                   Sarah Collins, Project Lead
                 </div>
               </div>
             </div>
 
-            <div className="relative bg-white/5 border border-white/10 rounded-2xl p-8 pt-14 shadow-lg backdrop-blur-md">
-              <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-16 h-16 rounded-full overflow-hidden border-4 border-black/60">
+            <div className="relative p-8 border shadow-lg bg-white/5 border-white/10 rounded-2xl pt-14 backdrop-blur-md">
+              <div className="absolute w-16 h-16 overflow-hidden -translate-x-1/2 border-4 rounded-full -top-10 left-1/2 border-black/60">
                 <img
                   src={PImage2}
                   alt="User 2"
-                  className="w-full h-full object-cover"
+                  className="object-cover w-full h-full"
                 />
               </div>
 
-              <p className="text-gray-200 text-sm md:text-base leading-relaxed mb-6">
+              <p className="mb-6 text-sm leading-relaxed text-gray-200 md:text-base">
                 “The skill tracking and matching features save us hours every
                 week. We finally have a clear view of our capabilities across
                 projects.”
               </p>
 
               <div className="text-center">
-                <div className="text-gray-400 text-sm mb-1">
+                <div className="mb-1 text-sm text-gray-400">
                   BrightLane Consulting
                 </div>
-                <div className="font-semibold text-sm md:text-base">
+                <div className="text-sm font-semibold md:text-base">
                   Daniel Lee, Operations Manager
                 </div>
               </div>
             </div>
 
-            <div className="relative bg-white/5 border border-white/10 rounded-2xl p-8 pt-14 shadow-lg backdrop-blur-md">
-              <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-16 h-16 rounded-full overflow-hidden border-4 border-black/60">
+            <div className="relative p-8 border shadow-lg bg-white/5 border-white/10 rounded-2xl pt-14 backdrop-blur-md">
+              <div className="absolute w-16 h-16 overflow-hidden -translate-x-1/2 border-4 rounded-full -top-10 left-1/2 border-black/60">
                 <img
                   src={PImage3}
                   alt="User 3"
-                  className="w-full h-full object-cover"
+                  className="object-cover w-full h-full"
                 />
               </div>
 
-              <p className="text-gray-200 text-sm md:text-base leading-relaxed mb-6">
+              <p className="mb-6 text-sm leading-relaxed text-gray-200 md:text-base">
                 “The charts and analytics give us instant insight into skill
                 gaps and future hiring needs. Skill Fusion has become a key
                 planning tool.”
               </p>
 
               <div className="text-center">
-                <div className="text-gray-400 text-sm mb-1">
+                <div className="mb-1 text-sm text-gray-400">
                   EdgePoint Digital
                 </div>
-                <div className="font-semibold text-sm md:text-base">
+                <div className="text-sm font-semibold md:text-base">
                   Maria Gomez, HR & Talent Partner
                 </div>
               </div>
@@ -252,9 +261,9 @@ const Home = () => {
           </h3>
         </div>
 
-        <div className="lx-footer__social mt-8">
+        <div className="mt-8 lx-footer__social">
           <h4 className="mb-4 font-semibold">Follow SkillFusion </h4>
-          <div className="lx-footer__icons flex justify-center gap-2">
+          <div className="flex justify-center gap-2 lx-footer__icons">
             {[
               { icon: "fab fa-facebook-f", url: "#" },
               { icon: "fab fa-linkedin-in", url: "#" },
@@ -287,6 +296,8 @@ const Home = () => {
         </div>
       </footer>
     </div>
+    
+    </>
   );
 };
 
