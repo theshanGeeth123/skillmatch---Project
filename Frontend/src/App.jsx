@@ -6,6 +6,9 @@ import Login from './Pages/Login';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Dashboard from "./Pages/Dashboard.jsx";
+import Personnel from "./Pages/Personnel.jsx";
+import Skills from "./Pages/Skills.jsx";
+import PersonnelSkills from "./Pages/PersonnelSkills.jsx";
 
 const App = () => {
   return (
@@ -14,7 +17,9 @@ const App = () => {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        
+        <Route path="/personnel" element={<Personnel />} />
+        <Route path="/skills" element={<Skills />} />
+        <Route path="/personnel-skills" element={<PersonnelSkills />} />
       </Routes>
     </BrowserRouter>
   )
