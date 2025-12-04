@@ -1,7 +1,5 @@
-// handlers/stats.js
 import { pool } from "../db/Connection.js";
 
-// Helper to get userId from query string
 const getUserIdFromQuery = (req) => {
   const raw = req.query.userId;
   const userId = parseInt(raw, 10);
@@ -9,8 +7,6 @@ const getUserIdFromQuery = (req) => {
   return userId;
 };
 
-// 1) Skills distribution (per user)
-//    How many personnel have each skill
 export const getSkillsDistribution = async (req, res) => {
   const userId = getUserIdFromQuery(req);
   if (!userId) {
@@ -49,7 +45,6 @@ export const getSkillsDistribution = async (req, res) => {
   }
 };
 
-// 2) Experience level stats (per user)
 export const getExperienceLevelStats = async (req, res) => {
   const userId = getUserIdFromQuery(req);
   if (!userId) {
@@ -81,7 +76,6 @@ export const getExperienceLevelStats = async (req, res) => {
   }
 };
 
-// 3) Project status stats (per user)
 export const getProjectStatusStats = async (req, res) => {
   const userId = getUserIdFromQuery(req);
   if (!userId) {
@@ -113,11 +107,7 @@ export const getProjectStatusStats = async (req, res) => {
   }
 };
 
-// 4) Project skill coverage (per user & per project)
-// total required skills for the project
-// how many skills are covered by your personnel
-// coverage percentage
-// details for each skill (covered or missing)
+
 
 export const getProjectSkillCoverage = async (req, res) => {
   const { projectId } = req.params;
@@ -164,7 +154,6 @@ export const getProjectSkillCoverage = async (req, res) => {
       });
     }
 
-    // 3) For each required skill, see if at least one of *this user's* personnel covers it
     const coverageResults = await Promise.all(
       requiredSkills.map(async (reqSkill) => {
         const [rows] = await pool.query(

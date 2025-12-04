@@ -73,13 +73,14 @@ const Dashboard = () => {
       path: "/matching",
     },
     {
-  key: "analytics",
-  title: "Status & Analytics",
-  description:
-    "View charts for skills, experience levels, project statuses, and check skill coverage for a specific project.",
-  actionLabel: "Open Status & Analytics",
-  path: "/analytics",
-},
+      key: "analytics",
+      title: "Status & Analytics",
+      description:
+        "View charts for skills, experience levels, project statuses, and check skill coverage for a specific project.",
+      actionLabel: "Open Status & Analytics",
+      path: "/analytics",
+    },
+    
 
     // Later, when you create /analytics route, we can add:
     // {

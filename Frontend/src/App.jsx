@@ -29,6 +29,7 @@ const App = () => {
         <Route path="/project-required-skills" element={<ProjectRequiredSkills />} />
         <Route path="/matching" element={<Matching />} />
          <Route path="/analytics" element={<Analytics />} />
+        
 
       </Routes>
     </BrowserRouter>
