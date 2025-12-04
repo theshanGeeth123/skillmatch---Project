@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import NavBar2 from "../NavBar/NavBar2";
+import NavBar2 from "../NavBar/NavBar3";
 import Footer1 from "../Footers/Footer1";
 
 const API_BASE_URL = "http://localhost:5000/api";
@@ -111,7 +111,7 @@ const Matching = () => {
     <div className="flex flex-col min-h-screen bg-slate-950 text-slate-100">
       <NavBar2 />
 
-      <main className="flex-1 px-4 pt-24 pb-20 md:px-10 lg:px-16">
+      <main className="flex-1 px-4 pt-24 pb-20 md:px-10 lg:px-16 lg:mx-20">
         <h1 className="mb-3 text-2xl font-bold md:text-3xl">
           Skill Matching
         </h1>

@@ -526,7 +526,7 @@ const handleDownloadReportPdf = () => {
     <div className="flex flex-col min-h-screen bg-slate-950 text-slate-100">
       <NavBar2 />
 
-      <main className="flex-1 px-4 pt-24 pb-20 md:px-10 lg:px-40 ">
+      <main className="flex-1 px-4 pt-24 pb-20 md:px-10 lg:px-16 lg:mx-20">
         {/* Header with logo */}
         <header className="flex items-center gap-4 mb-8">
           

@@ -173,7 +173,7 @@ const Skills = () => {
     <div className="flex flex-col min-h-screen bg-slate-950 text-slate-100">
       <NavBar3 />
 
-      <main className="flex-1 px-4 pt-24 pb-16 md:px-10 lg:px-16">
+      <main className="flex-1 px-4 pt-24 pb-16 md:px-10 lg:px-16 lg:mx-20">
         <header className="flex flex-col gap-2 mb-8 md:flex-row md:items-end md:justify-between">
           <div>
             <h1 className="text-2xl font-bold md:text-3xl">Skill Management</h1>

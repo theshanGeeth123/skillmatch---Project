@@ -4,8 +4,8 @@ import { Link } from "react-router-dom";
 
 const NavBar1 = () => {
   return (
-    <nav className=" w-full fixed top-0 left-0 z-50   shadow-sm dark:bg-black/40">
-      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+    <nav className="fixed top-0 left-0 z-50 w-full shadow-sm  dark:bg-black/40">
+      <div className="flex items-center justify-between px-6 py-4 mx-auto md:px-10 lg:px-16 lg:mx-20">
         
        
         <div className="flex items-center gap-2">
@@ -13,13 +13,13 @@ const NavBar1 = () => {
           <img 
             src={Logo1} 
             alt="Logo" 
-            className="w-auto h-10 object-contain"
+            className="object-contain w-auto h-10"
           />
         </div>
 
 
           <Link to="/">
-            <button className="px-5 py-2 rounded-lg border border-white text-white hover:bg-gray-100 hover:text-black transition">
+            <button className="px-5 py-2 text-white transition border border-white rounded-lg hover:bg-gray-100 hover:text-black">
               Home
             </button>
           </Link>

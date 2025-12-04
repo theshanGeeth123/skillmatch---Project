@@ -175,7 +175,7 @@ const PersonnelSkills = () => {
     <div className="flex flex-col min-h-screen bg-slate-950 text-slate-100">
       <NavBar3 />
 
-      <main className="flex-1 px-4 pt-24 pb-20 md:px-10 lg:px-16">
+      <main className="flex-1 px-4 pt-24 pb-20 md:px-10 lg:px-16 lg:mx-20">
         <h1 className="mb-4 text-2xl font-bold md:text-3xl">
           Assign Skills to Personnel
         </h1>
