@@ -17,10 +17,10 @@ const NavBar1 = () => {
           />
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 ">
 
           <Link to="/login?mode=login">
-            <button className="px-5 py-2 text-white transition border border-white rounded-lg hover:bg-gray-100 hover:text-black">
+            <button className=" px-5 py-2 text-white transition border border-white rounded-lg hover:bg-gray-100 hover:text-black ">
               Sign In
             </button>
           </Link>
