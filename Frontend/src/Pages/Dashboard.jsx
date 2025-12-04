@@ -1,10 +1,12 @@
 import React, { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import NavBar2 from "../NavBar/NavBar2";
+import { useNavigate, useLocation } from "react-router-dom";
+import NavBar2 from "../NavBar/NavBarDash";
 import Footer1 from "../Footers/Footer1";
+import Analytics from "./Analytics2";
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Check session when page loads
   useEffect(() => {
@@ -76,74 +78,101 @@ const Dashboard = () => {
       key: "analytics",
       title: "Status & Analytics",
       description:
-        "View charts for skills, experience levels, project statuses, and check skill coverage for a specific project.",
+        "View charts for skills, experience levels, project statuses, and skill coverage for a specific project.",
       actionLabel: "Open Status & Analytics",
       path: "/analytics",
     },
-    
-
-    // Later, when you create /analytics route, we can add:
-    // {
-    //   key: "analytics",
-    //   title: "Analytics & Reports",
-    //   description:
-    //     "View charts and download reports for skills, personnel and projects.",
-    //   actionLabel: "View Analytics",
-    //   path: "/analytics",
-    // },
   ];
+
+  const isActive = (path) => location.pathname === path;
 
   return (
     <div className="flex flex-col min-h-screen bg-slate-950 text-slate-100">
       <NavBar2 />
 
-      <main className="flex-1 px-4 pt-24 pb-16 md:px-10 lg:px-16">
-        {/* Header with user name + logout */}
-        <header className="flex flex-col mb-10 md:flex-row md:items-center md:justify-between">
-          <div>
-            <h1 className="mb-1 text-2xl font-bold md:text-3xl">
-              Welcome, {userName}
-            </h1>
-            <p className="max-w-2xl text-sm md:text-base text-slate-300">
-              Use this dashboard to navigate between personnel, skills, projects,
-              personnel skill assignments, project requirements, and matching.
-            </p>
-          </div>
+      <main className="flex-1 px-4 pt-24 pb-10 md:px-8 lg:px-12 md:px-10 lg:px-16 lg:mx-20">
+        {/* Layout: Left sidebar (links) + Right content (Analytics) */}
+        <div className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)] xl:grid-cols-[280px_minmax(0,1fr)]">
+          {/* Sidebar */}
+          <aside className="flex flex-col p-4 border shadow-xl bg-slate-900/90 border-slate-800 rounded-2xl">
+            <div className="mb-4">
+              <p className="text-xs font-semibold tracking-wide uppercase text-slate-400">
+                Workspace
+              </p>
+              <h2 className="mt-1 text-lg font-semibold text-slate-50">
+                Skill Fusion Console
+              </h2>
+              <p className="mt-1 text-xs text-slate-400">
+                Navigate between core management modules.
+              </p>
+            </div>
 
-          {/* Logout button */}
-          <button
-            onClick={handleLogout}
-            className="px-4 py-2 mt-4 text-sm font-semibold transition-all bg-red-500 md:mt-0 rounded-xl hover:bg-red-600"
-          >
-            Logout
-          </button>
-        </header>
+            <nav className="flex-1 mt-2 space-y-1">
+              {sections.map((section) => (
+                <button
+                  key={section.key}
+                  onClick={() => navigate(section.path)}
+                  className={`w-full text-left px-3 py-2.5 rounded-xl transition-all flex flex-col border
+                    ${
+                      isActive(section.path)
+                        ? "bg-blue-600/20 border-blue-500/70"
+                        : "bg-transparent border-transparent hover:bg-slate-800/80 hover:border-slate-700"
+                    }`}
+                >
+                  <span className="flex items-center justify-between text-sm font-semibold text-slate-50">
+                    {section.title}
+                    <span className="text-[11px] text-slate-400 ml-2">
+                      &gt;
+                    </span>
+                  </span>
+                  <span className="mt-1 text-[11px] leading-snug text-slate-400 line-clamp-2">
+                    {section.description}
+                  </span>
+                </button>
+              ))}
+            </nav>
 
-        {/* Dashboard sections */}
-        <section className="grid gap-5 md:gap-6 md:grid-cols-2 xl:grid-cols-3">
-          {sections.map((section) => (
-            <div
-              key={section.key}
-              className="flex flex-col justify-between p-5 transition-all duration-200 border shadow-lg bg-slate-900/80 border-slate-800 rounded-2xl hover:border-blue-500/60 hover:-translate-y-1"
-            >
+            {/* Optional quick link footer in sidebar */}
+            <div className="pt-3 mt-3 text-[11px] border-t border-slate-800 text-slate-500">
+              Logged in as{" "}
+              <span className="font-medium text-slate-200">{userName}</span>
+            </div>
+          </aside>
+
+          {/* Main Content: Welcome + Analytics segment on the right */}
+          <section className="bg-slate-900/80 border border-slate-800 rounded-2xl shadow-xl flex flex-col min-h-[300px]">
+            {/* Header with user name + logout */}
+            <header className="flex flex-col gap-3 p-5 border-b border-slate-800 md:flex-row md:items-center md:justify-between">
               <div>
-                <h2 className="mb-2 text-lg font-semibold md:text-xl">
-                  {section.title}
-                </h2>
-                <p className="mb-4 text-xs md:text-sm text-slate-300">
-                  {section.description}
+                <h1 className="text-2xl font-semibold md:text-3xl">
+                  Welcome, {userName}
+                </h1>
+                <p className="max-w-2xl mt-1 text-sm md:text-base text-slate-300">
+                  Use this console to manage personnel, skills, projects, and
+                  requirements. The live analytics on the right keeps you
+                  updated on the current status.
                 </p>
               </div>
 
               <button
-                onClick={() => navigate(section.path)}
-                className="inline-flex items-center justify-center px-4 py-2 mt-2 text-xs font-semibold text-white transition-all bg-blue-500 rounded-xl md:text-sm hover:bg-blue-600"
+                onClick={handleLogout}
+                className="self-start px-4 py-2 text-sm font-semibold transition-all bg-red-500 rounded-xl hover:bg-red-600 md:self-auto"
               >
-                {section.actionLabel}
+                Logout
               </button>
+            </header>
+
+            {/* Analytics content area */}
+            <div className="flex-1 p-4 overflow-auto md:p-5">
+              {/* 
+                If your Analytics component already has its own NavBar/Footer,
+                consider extracting the core charts into a reusable <AnalyticsOverview />
+                and render that here instead.
+              */}
+              <Analytics />
             </div>
-          ))}
-        </section>
+          </section>
+        </div>
       </main>
 
       <Footer1 />
