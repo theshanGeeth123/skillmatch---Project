@@ -39,9 +39,7 @@ const Matching = () => {
         setLoadingProjects(true);
         setError("");
 
-        const res = await fetch(
-          `${API_BASE_URL}/projects?userId=${userId}`
-        );
+        const res = await fetch(`${API_BASE_URL}/projects?userId=${userId}`);
         const data = await res.json();
 
         if (!res.ok || !data.success) {
@@ -101,20 +99,12 @@ const Matching = () => {
     }
   };
 
-  // Use backend's match_percentage
-  const formatScore = (percentage) => {
-    if (percentage === null || percentage === undefined) return "-";
-    return `${Math.round(percentage)}%`;
-  };
-
   return (
     <div className="flex flex-col min-h-screen bg-slate-950 text-slate-100">
       <NavBar2 />
 
       <main className="flex-1 px-4 pt-24 pb-20 md:px-10 lg:px-16 lg:mx-20">
-        <h1 className="mb-3 text-2xl font-bold md:text-3xl">
-          Skill Matching
-        </h1>
+        <h1 className="mb-3 text-2xl font-bold md:text-3xl">Skill Matching</h1>
         <p className="max-w-2xl mb-6 text-sm text-slate-300 md:text-base">
           Choose a project to find personnel who match all required skills,
           filtered by minimum proficiency.
@@ -132,7 +122,7 @@ const Matching = () => {
           </div>
         )}
 
-        {/* Project selector + button */}
+        {/* Project selector */}
         <section className="flex flex-col gap-4 p-5 mb-8 border bg-slate-900/70 border-slate-800 rounded-2xl md:flex-row md:items-end">
           <div className="flex-1">
             <label className="block mb-1 text-sm text-slate-300">
@@ -171,19 +161,17 @@ const Matching = () => {
 
         {/* Results */}
         <section className="p-5 border bg-slate-900/70 border-slate-800 rounded-2xl">
-          <h2 className="mb-4 text-lg font-semibold">
-            Matching Results
-          </h2>
+          <h2 className="mb-4 text-lg font-semibold">Matching Results</h2>
 
           {!selectedProject && (
             <p className="text-sm text-slate-400">
-              Select a project and click &quot;Run Matching&quot; to see results.
+              Select a project and click "Run Matching" to see results.
             </p>
           )}
 
           {selectedProject && !loadingMatches && matches.length === 0 && !info && (
             <p className="text-sm text-slate-400">
-              No results yet. Click &quot;Run Matching&quot;.
+              No results yet. Click "Run Matching".
             </p>
           )}
 
@@ -199,9 +187,9 @@ const Matching = () => {
                     <th className="py-2 text-left">Person</th>
                     <th className="py-2 text-left">Role / Level</th>
                     <th className="py-2 text-left">Matched Skills</th>
-                    <th className="py-2 text-right">Match Score</th>
                   </tr>
                 </thead>
+
                 <tbody>
                   {matches.map((m) => (
                     <tr
@@ -211,12 +199,10 @@ const Matching = () => {
                       {/* Person */}
                       <td className="py-2 pr-3">
                         <div className="font-medium">{m.name}</div>
-                        <div className="text-xs text-slate-400">
-                          {m.email}
-                        </div>
+                        <div className="text-xs text-slate-400">{m.email}</div>
                       </td>
 
-                      {/* Role + experience */}
+                      {/* Role */}
                       <td className="py-2 pr-3 text-slate-300">
                         <div>{m.role || "-"}</div>
                         <div className="text-xs text-slate-400">
@@ -229,15 +215,9 @@ const Matching = () => {
                         {m.matched_skills && m.matched_skills.length > 0 ? (
                           <ul className="space-y-1">
                             {m.matched_skills.map((s) => (
-                              <li
-                                key={s.skill_id}
-                                className="text-xs md:text-[13px]"
-                              >
-                                <span className="font-medium">
-                                  {s.skill_name}
-                                </span>{" "}
-                                — required L{s.required_min}, person L
-                                {s.proficiency}
+                              <li key={s.skill_id} className="text-xs md:text-[13px]">
+                                <span className="font-medium">{s.skill_name}</span>{" "}
+                                — required L{s.required_min}, person L{s.proficiency}
                               </li>
                             ))}
                           </ul>
@@ -246,11 +226,6 @@ const Matching = () => {
                             No skills details provided.
                           </span>
                         )}
-                      </td>
-
-                      {/* Score */}
-                      <td className="py-2 font-semibold text-right">
-                        {formatScore(m.match_percentage)}
                       </td>
                     </tr>
                   ))}

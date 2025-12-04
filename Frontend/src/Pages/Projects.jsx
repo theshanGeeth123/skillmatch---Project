@@ -39,7 +39,7 @@ const Projects = () => {
     // Name: required, 3–20 characters
     if (!trimmedName) {
       errors.name = "Project name is required.";
-    } else if (trimmedName.length < 3 || trimmedName.length > 20) {
+    } else if (trimmedName.length < 3 || trimmedName.length > 50) {
       errors.name = "Project name must be between 3 and 20 characters.";
     }
 
