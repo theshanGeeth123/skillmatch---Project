@@ -68,3 +68,9 @@
   background-color: var(--dark);
   box-shadow: none;
 }
+
+
+/* Change calendar icon to white */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}

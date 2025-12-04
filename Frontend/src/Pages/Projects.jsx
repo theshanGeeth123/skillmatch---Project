@@ -27,6 +27,47 @@ const Projects = () => {
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
+  // NEW: field-level validation errors
+  const [fieldErrors, setFieldErrors] = useState({});
+
+  const validateForm = () => {
+    const errors = {};
+
+    const trimmedName = form.name.trim();
+    const trimmedDescription = form.description.trim();
+
+    // Name: required, 3–20 characters
+    if (!trimmedName) {
+      errors.name = "Project name is required.";
+    } else if (trimmedName.length < 3 || trimmedName.length > 20) {
+      errors.name = "Project name must be between 3 and 20 characters.";
+    }
+
+    // Description: required, 5–100 characters
+    if (!trimmedDescription) {
+      errors.description = "Description is required.";
+    } else if (
+      trimmedDescription.length < 5 ||
+      trimmedDescription.length > 100
+    ) {
+      errors.description = "Description must be between 5 and 100 characters.";
+    }
+
+    // Dates: start_date can be anything, but if both are provided,
+    // end_date must be on or after start_date
+    if (form.start_date && form.end_date) {
+      const start = new Date(form.start_date);
+      const end = new Date(form.end_date);
+
+      if (end < start) {
+        errors.end_date = "End date cannot be before the start date.";
+      }
+    }
+
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   // Check login + set userId
   useEffect(() => {
     const storedId = localStorage.getItem("sf_userId");
@@ -78,9 +119,14 @@ const Projects = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setSaving(true);
     setError("");
     setSuccessMessage("");
+
+    // Frontend validation first
+    if (!validateForm()) {
+      setError("Please fix the highlighted fields.");
+      return;
+    }
 
     if (!userId) {
       setError("Session expired. Please log in again.");
@@ -88,18 +134,27 @@ const Projects = () => {
       return;
     }
 
+    setSaving(true);
+
     try {
       const method = editingId ? "PUT" : "POST";
       const url = editingId
         ? `${API_BASE_URL}/projects/${editingId}?userId=${userId}`
         : `${API_BASE_URL}/projects?userId=${userId}`;
 
+      // Trim text before sending
+      const payload = {
+        ...form,
+        name: form.name.trim(),
+        description: form.description.trim(),
+      };
+
       const res = await fetch(url, {
         method,
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(form),
+        body: JSON.stringify(payload),
       });
 
       const data = await res.json();
@@ -115,6 +170,7 @@ const Projects = () => {
       );
       setForm(emptyForm);
       setEditingId(null);
+      setFieldErrors({});
       loadProjects();
     } catch (err) {
       console.error(err);
@@ -137,6 +193,7 @@ const Projects = () => {
     setEditingId(project.id);
     setError("");
     setSuccessMessage("");
+    setFieldErrors({});
   };
 
   const handleCancelEdit = () => {
@@ -144,6 +201,7 @@ const Projects = () => {
     setEditingId(null);
     setError("");
     setSuccessMessage("");
+    setFieldErrors({});
   };
 
   const handleDelete = async (id) => {
@@ -226,10 +284,20 @@ const Projects = () => {
                   type="text"
                   value={form.name}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border rounded-lg bg-slate-950/60 border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={`w-full px-3 py-2 border rounded-lg bg-slate-950/60 focus:outline-none focus:ring-2
+                    ${
+                      fieldErrors.name
+                        ? "border-red-500 focus:ring-red-500"
+                        : "border-slate-700 focus:ring-blue-500"
+                    }`}
                   placeholder="Enter project name"
                   required
                 />
+                {fieldErrors.name && (
+                  <p className="mt-1 text-xs text-red-400">
+                    {fieldErrors.name}
+                  </p>
+                )}
               </div>
 
               <div>
@@ -237,7 +305,7 @@ const Projects = () => {
                   className="block mb-1 text-slate-300"
                   htmlFor="description"
                 >
-                  Description
+                  Description<span className="text-red-400">*</span>
                 </label>
                 <textarea
                   id="description"
@@ -245,9 +313,19 @@ const Projects = () => {
                   value={form.description}
                   onChange={handleChange}
                   rows={3}
-                  className="w-full px-3 py-2 border rounded-lg bg-slate-950/60 border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={`w-full px-3 py-2 border rounded-lg bg-slate-950/60 focus:outline-none focus:ring-2
+                    ${
+                      fieldErrors.description
+                        ? "border-red-500 focus:ring-red-500"
+                        : "border-slate-700 focus:ring-blue-500"
+                    }`}
                   placeholder="Brief description of the project"
                 />
+                {fieldErrors.description && (
+                  <p className="mt-1 text-xs text-red-400">
+                    {fieldErrors.description}
+                  </p>
+                )}
               </div>
 
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -261,7 +339,7 @@ const Projects = () => {
                   <input
                     id="start_date"
                     name="start_date"
-                    type="date"
+                    type="date" // calendar picker
                     value={form.start_date}
                     onChange={handleChange}
                     className="w-full px-3 py-2 border rounded-lg bg-slate-950/60 border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -278,11 +356,22 @@ const Projects = () => {
                   <input
                     id="end_date"
                     name="end_date"
-                    type="date"
+                    type="date" // calendar picker
                     value={form.end_date}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border rounded-lg bg-slate-950/60 border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    min={form.start_date || undefined} // prevent picking before start date
+                    className={`w-full px-3 py-2 border rounded-lg bg-slate-950/60 focus:outline-none focus:ring-2
+                      ${
+                        fieldErrors.end_date
+                          ? "border-red-500 focus:ring-red-500"
+                          : "border-slate-700 focus:ring-blue-500"
+                      }`}
                   />
+                  {fieldErrors.end_date && (
+                    <p className="mt-1 text-xs text-red-400">
+                      {fieldErrors.end_date}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -319,15 +408,15 @@ const Projects = () => {
                     : "Create Project"}
                 </button>
 
-              {editingId && (
-                <button
-                  type="button"
-                  onClick={handleCancelEdit}
-                  className="px-4 py-2 text-sm border rounded-xl border-slate-600 text-slate-200 hover:bg-slate-800"
-                >
-                  Cancel
-                </button>
-              )}
+                {editingId && (
+                  <button
+                    type="button"
+                    onClick={handleCancelEdit}
+                    className="px-4 py-2 text-sm border rounded-xl border-slate-600 text-slate-200 hover:bg-slate-800"
+                  >
+                    Cancel
+                  </button>
+                )}
               </div>
             </form>
           </section>

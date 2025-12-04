@@ -26,6 +26,48 @@ const Personnel = () => {
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
+  const [fieldErrors, setFieldErrors] = useState({});
+
+  const validateForm = () => {
+    const errors = {};
+
+    const trimmedName = form.name.trim();
+    const trimmedEmail = form.email.trim();
+    const trimmedRole = form.role.trim();
+
+    // NAME → 5–20 chars, letters & spaces only
+    const nameRegex = /^[A-Za-z ]{5,20}$/;
+    if (!trimmedName) {
+      errors.name = "Name is required.";
+    } else if (!nameRegex.test(trimmedName)) {
+      errors.name = "Name must be 5–20 characters (letters and spaces only).";
+    }
+
+    // EMAIL → standard email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!trimmedEmail) {
+      errors.email = "Email is required.";
+    } else if (!emailRegex.test(trimmedEmail)) {
+      errors.email = "Enter a valid email address.";
+    }
+
+    // ROLE → 2–80 chars, letters, spaces, hyphens only
+    const roleRegex = /^[A-Za-z -]{2,80}$/;
+    if (trimmedRole && !roleRegex.test(trimmedRole)) {
+      errors.role =
+        "Role must be 2–80 characters and contain only letters, spaces, or hyphens.";
+    }
+
+    // EXPERIENCE LEVEL → must be valid option
+    const allowedLevels = ["Junior", "Mid-Level", "Senior"];
+    if (!allowedLevels.includes(form.experience_level)) {
+      errors.experience_level = "Select a valid experience level.";
+    }
+
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   // Check login + set userId
   useEffect(() => {
     const storedId = localStorage.getItem("sf_userId");
@@ -80,6 +122,12 @@ const Personnel = () => {
     e.preventDefault();
     setError("");
     setSuccessMessage("");
+
+    // Run frontend validation first
+    if (!validateForm()) {
+      setError("Please fix the highlighted fields.");
+      return;
+    }
 
     if (!userId) {
       setError("Session expired. Please log in again.");
@@ -193,7 +241,6 @@ const Personnel = () => {
           </div>
         </header>
 
-        {/* Messages */}
         {error && (
           <div className="max-w-xl px-4 py-2 mb-4 text-sm text-red-100 border rounded-lg bg-red-900/40 border-red-500/50">
             {error}
@@ -205,9 +252,8 @@ const Personnel = () => {
           </div>
         )}
 
-        {/* Form + list layout */}
         <div className="grid gap-8 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
-          {/* Form */}
+      
           <section className="p-5 border shadow-lg bg-slate-900/80 border-slate-800 rounded-2xl">
             <h2 className="mb-3 text-lg font-semibold">
               {editingId ? "Edit Personnel" : "Add New Personnel"}
@@ -224,11 +270,21 @@ const Personnel = () => {
                   type="text"
                   value={form.name}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border rounded-lg bg-slate-950/60 border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={`w-full px-3 py-2 border rounded-lg bg-slate-950/60 
+                    focus:outline-none focus:ring-2
+                    ${
+                      fieldErrors.name
+                        ? "border-red-500 focus:ring-red-500"
+                        : "border-slate-700 focus:ring-blue-500"
+                    }`}
                   placeholder="Enter full name"
                   required
                 />
+                {fieldErrors.name && (
+                  <p className="mt-1 text-xs text-red-400">{fieldErrors.name}</p>
+                )}
               </div>
+
 
               <div>
                 <label className="block mb-1 text-slate-300" htmlFor="email">
@@ -240,11 +296,21 @@ const Personnel = () => {
                   type="email"
                   value={form.email}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border rounded-lg bg-slate-950/60 border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={`w-full px-3 py-2 border rounded-lg bg-slate-950/60 
+                    focus:outline-none focus:ring-2
+                    ${
+                      fieldErrors.email
+                        ? "border-red-500 focus:ring-red-500"
+                        : "border-slate-700 focus:ring-blue-500"
+                    }`}
                   placeholder="person@example.com"
                   required
                 />
+                {fieldErrors.email && (
+                  <p className="mt-1 text-xs text-red-400">{fieldErrors.email}</p>
+                )}
               </div>
+
 
               <div>
                 <label className="block mb-1 text-slate-300" htmlFor="role">
@@ -256,10 +322,20 @@ const Personnel = () => {
                   type="text"
                   value={form.role}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border rounded-lg bg-slate-950/60 border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={`w-full px-3 py-2 border rounded-lg bg-slate-950/60 
+                    focus:outline-none focus:ring-2
+                    ${
+                      fieldErrors.role
+                        ? "border-red-500 focus:ring-red-500"
+                        : "border-slate-700 focus:ring-blue-500"
+                    }`}
                   placeholder='e.g. "Frontend Developer"'
                 />
+                {fieldErrors.role && (
+                  <p className="mt-1 text-xs text-red-400">{fieldErrors.role}</p>
+                )}
               </div>
+
 
               <div>
                 <label

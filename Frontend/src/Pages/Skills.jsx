@@ -24,6 +24,34 @@ const Skills = () => {
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
+  // NEW: field-level validation errors
+  const [fieldErrors, setFieldErrors] = useState({});
+
+  const validateForm = () => {
+    const errors = {};
+
+    const trimmedName = form.name.trim();
+    const trimmedDescription = form.description.trim();
+
+    // Skill name: required, 3–20 characters
+    if (!trimmedName) {
+      errors.name = "Skill name is required.";
+    } else if (trimmedName.length < 3 || trimmedName.length > 20) {
+      errors.name = "Skill name must be between 3 and 20 characters.";
+    }
+
+    // Description: optional, but if provided must be 5–100 characters
+    if (trimmedDescription) {
+      if (trimmedDescription.length < 5 || trimmedDescription.length > 100) {
+        errors.description =
+          "Description must be between 5 and 100 characters.";
+      }
+    }
+
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   // Check login + set userId
   useEffect(() => {
     const storedId = localStorage.getItem("sf_userId");
@@ -78,6 +106,12 @@ const Skills = () => {
     setError("");
     setSuccessMessage("");
 
+    // Frontend validation
+    if (!validateForm()) {
+      setError("Please fix the highlighted fields.");
+      return;
+    }
+
     if (!userId) {
       setError("Session expired. Please log in again.");
       navigate("/login");
@@ -92,12 +126,19 @@ const Skills = () => {
         ? `${API_BASE_URL}/skills/${editingId}?userId=${userId}`
         : `${API_BASE_URL}/skills?userId=${userId}`;
 
+      // Trim before sending
+      const payload = {
+        ...form,
+        name: form.name.trim(),
+        description: form.description.trim(),
+      };
+
       const res = await fetch(url, {
         method,
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(form),
+        body: JSON.stringify(payload),
       });
 
       const data = await res.json();
@@ -111,6 +152,7 @@ const Skills = () => {
       );
       setForm(emptyForm);
       setEditingId(null);
+      setFieldErrors({});
       loadSkills();
     } catch (err) {
       console.error(err);
@@ -129,6 +171,7 @@ const Skills = () => {
     setEditingId(skill.id);
     setError("");
     setSuccessMessage("");
+    setFieldErrors({});
   };
 
   const handleCancelEdit = () => {
@@ -136,6 +179,7 @@ const Skills = () => {
     setEditingId(null);
     setError("");
     setSuccessMessage("");
+    setFieldErrors({});
   };
 
   const handleDelete = async (id) => {
@@ -215,10 +259,20 @@ const Skills = () => {
                   type="text"
                   value={form.name}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border rounded-lg bg-slate-950/60 border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={`w-full px-3 py-2 border rounded-lg bg-slate-950/60 focus:outline-none focus:ring-2
+                    ${
+                      fieldErrors.name
+                        ? "border-red-500 focus:ring-red-500"
+                        : "border-slate-700 focus:ring-blue-500"
+                    }`}
                   placeholder="e.g. React, Python, Communication"
                   required
                 />
+                {fieldErrors.name && (
+                  <p className="mt-1 text-xs text-red-400">
+                    {fieldErrors.name}
+                  </p>
+                )}
               </div>
 
               <div>
@@ -253,9 +307,20 @@ const Skills = () => {
                   rows={3}
                   value={form.description}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border rounded-lg resize-none bg-slate-950/60 border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                  className={`w-full px-3 py-2 border rounded-lg resize-none bg-slate-950/60 focus:outline-none focus:ring-2
+                    ${
+                      fieldErrors.description
+                        ? "border-red-500 focus:ring-red-500"
+                        : "border-slate-700 focus:ring-blue-500"
+                    }`}
                   placeholder="Optional details about this skill..."
                 />
+                {fieldErrors.description && (
+                  <p className="mt-1 text-xs text-red-400">
+                    {fieldErrors.description}
+                  </p>
+                )}
               </div>
 
               <div className="flex gap-3 pt-2">
