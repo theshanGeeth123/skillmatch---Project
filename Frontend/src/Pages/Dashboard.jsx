@@ -91,9 +91,9 @@ const Dashboard = () => {
       <NavBar2 />
 
       <main className="flex-1 px-4 pt-24 pb-10 md:px-8 lg:px-12 md:px-10 lg:px-16 lg:mx-20">
-        {/* Layout: Left sidebar (links) + Right content (Analytics) */}
+    
         <div className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)] xl:grid-cols-[280px_minmax(0,1fr)]">
-          {/* Sidebar */}
+         
           <aside className="flex flex-col p-4 border shadow-xl bg-slate-900/90 border-slate-800 rounded-2xl">
             <div className="mb-4">
               <p className="text-xs font-semibold tracking-wide uppercase text-slate-400">
@@ -132,16 +132,14 @@ const Dashboard = () => {
               ))}
             </nav>
 
-            {/* Optional quick link footer in sidebar */}
             <div className="pt-3 mt-3 text-[11px] border-t border-slate-800 text-slate-500">
               Logged in as{" "}
               <span className="font-medium text-slate-200">{userName}</span>
             </div>
           </aside>
 
-          {/* Main Content: Welcome + Analytics segment on the right */}
           <section className="bg-slate-900/80 border border-slate-800 rounded-2xl shadow-xl flex flex-col min-h-[300px]">
-            {/* Header with user name + logout */}
+          
             <header className="flex flex-col gap-3 p-5 border-b border-slate-800 md:flex-row md:items-center md:justify-between">
               <div>
                 <h1 className="text-2xl font-semibold md:text-3xl">
