@@ -836,19 +836,19 @@ const handleDownloadReportPdf = () => {
 
                   <div className="grid gap-4 md:grid-cols-3">
                     <div>
-                      <p className="text-slate-400">Total Skills</p>
+                      <p className="text-slate-400">Skills</p>
                       <p className="text-lg font-semibold">
                         {report.summary.total_skills}
                       </p>
                     </div>
                     <div>
-                      <p className="text-slate-400">Total Personnel</p>
+                      <p className="text-slate-400">Personnel</p>
                       <p className="text-lg font-semibold">
                         {report.summary.total_personnel}
                       </p>
                     </div>
                     <div>
-                      <p className="text-slate-400">Total Projects</p>
+                      <p className="text-slate-400">Projects</p>
                       <p className="text-lg font-semibold">
                         {report.summary.total_projects}
                       </p>

@@ -154,12 +154,7 @@ const Dashboard = () => {
                 </p>
               </div>
 
-              <button
-                onClick={handleLogout}
-                className="self-start px-4 py-2 text-sm font-semibold transition-all bg-red-500 rounded-xl hover:bg-red-600 md:self-auto"
-              >
-                Logout
-              </button>
+              
             </header>
 
             {/* Analytics content area */}
