@@ -1,9 +1,24 @@
+// handlers/stats.js
 import { pool } from "../db/Connection.js";
 
+// Helper to get userId from query string
+const getUserIdFromQuery = (req) => {
+  const raw = req.query.userId;
+  const userId = parseInt(raw, 10);
+  if (!userId || Number.isNaN(userId)) return null;
+  return userId;
+};
 
-//Returns how many personnel have each skill.
-
+// 1) Skills distribution (per user)
+//    How many personnel have each skill
 export const getSkillsDistribution = async (req, res) => {
+  const userId = getUserIdFromQuery(req);
+  if (!userId) {
+    return res
+      .status(400)
+      .json({ success: false, message: "userId query parameter is required" });
+  }
+
   try {
     const [rows] = await pool.query(
       `
@@ -11,19 +26,21 @@ export const getSkillsDistribution = async (req, res) => {
         s.id AS skill_id,
         s.name AS skill_name,
         s.category,
-        COUNT(ps.personnel_id) AS personnel_count
+        COUNT(DISTINCT ps.personnel_id) AS personnel_count
       FROM skills s
       LEFT JOIN personnel_skills ps
         ON s.id = ps.skill_id
+      LEFT JOIN personnel p
+        ON ps.personnel_id = p.id
+      WHERE s.user_id = ?
+        AND (p.user_id = ? OR p.user_id IS NULL)
       GROUP BY s.id, s.name, s.category
       ORDER BY personnel_count DESC, s.name ASC
-      `
+      `,
+      [userId, userId]
     );
 
-    return res.status(200).json({
-      success: true,
-      data: rows,
-    });
+    return res.status(200).json({ success: true, data: rows });
   } catch (error) {
     console.error("Error fetching skills distribution:", error);
     return res
@@ -32,10 +49,15 @@ export const getSkillsDistribution = async (req, res) => {
   }
 };
 
-
- // Returns how many personnel are at each experience level (senior , junior ,Mid-Level):
- 
+// 2) Experience level stats (per user)
 export const getExperienceLevelStats = async (req, res) => {
+  const userId = getUserIdFromQuery(req);
+  if (!userId) {
+    return res
+      .status(400)
+      .json({ success: false, message: "userId query parameter is required" });
+  }
+
   try {
     const [rows] = await pool.query(
       `
@@ -43,16 +65,14 @@ export const getExperienceLevelStats = async (req, res) => {
         experience_level,
         COUNT(*) AS count
       FROM personnel
+      WHERE user_id = ?
       GROUP BY experience_level
-      ORDER BY 
-        FIELD(experience_level, 'Junior', 'Mid-Level', 'Senior')
-      `
+      ORDER BY FIELD(experience_level, 'Junior', 'Mid-Level', 'Senior')
+      `,
+      [userId]
     );
 
-    return res.status(200).json({
-      success: true,
-      data: rows,
-    });
+    return res.status(200).json({ success: true, data: rows });
   } catch (error) {
     console.error("Error fetching experience level stats:", error);
     return res
@@ -61,10 +81,15 @@ export const getExperienceLevelStats = async (req, res) => {
   }
 };
 
-
-// Returns how many projects are in each status:
-
+// 3) Project status stats (per user)
 export const getProjectStatusStats = async (req, res) => {
+  const userId = getUserIdFromQuery(req);
+  if (!userId) {
+    return res
+      .status(400)
+      .json({ success: false, message: "userId query parameter is required" });
+  }
+
   try {
     const [rows] = await pool.query(
       `
@@ -72,16 +97,14 @@ export const getProjectStatusStats = async (req, res) => {
         status,
         COUNT(*) AS count
       FROM projects
+      WHERE user_id = ?
       GROUP BY status
-      ORDER BY 
-        FIELD(status, 'Planning', 'Active', 'Completed')
-      `
+      ORDER BY FIELD(status, 'Planning', 'Active', 'Completed')
+      `,
+      [userId]
     );
 
-    return res.status(200).json({
-      success: true,
-      data: rows,
-    });
+    return res.status(200).json({ success: true, data: rows });
   } catch (error) {
     console.error("Error fetching project status stats:", error);
     return res
@@ -90,17 +113,36 @@ export const getProjectStatusStats = async (req, res) => {
   }
 };
 
-
-
+// 4) Project skill coverage (per user & per project)
 // total required skills for the project
-//  how many skills are covered by your personnel
-//  coverage percentage
+// how many skills are covered by your personnel
+// coverage percentage
 // details for each skill (covered or missing)
 
 export const getProjectSkillCoverage = async (req, res) => {
   const { projectId } = req.params;
 
+  const rawUserId = req.query.userId;
+  const userId = parseInt(rawUserId, 10);
+  if (!userId || Number.isNaN(userId)) {
+    return res
+      .status(400)
+      .json({ success: false, message: "userId query parameter is required" });
+  }
+
   try {
+    // 1) Ensure the project belongs to this user
+    const [projectRows] = await pool.query(
+      `SELECT id FROM projects WHERE id = ? AND user_id = ?`,
+      [projectId, userId]
+    );
+    if (projectRows.length === 0) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Project not found for this user" });
+    }
+
+    // 2) Get required skills for that project
     const [requiredSkills] = await pool.query(
       `
       SELECT 
@@ -108,7 +150,8 @@ export const getProjectSkillCoverage = async (req, res) => {
         prs.min_proficiency,
         s.name AS skill_name
       FROM project_required_skills prs
-      JOIN skills s ON prs.skill_id = s.id
+      JOIN skills s 
+        ON prs.skill_id = s.id
       WHERE prs.project_id = ?
       `,
       [projectId]
@@ -117,34 +160,38 @@ export const getProjectSkillCoverage = async (req, res) => {
     if (requiredSkills.length === 0) {
       return res.status(404).json({
         success: false,
-        message: "This project has no required skills"
+        message: "This project has no required skills",
       });
     }
 
+    // 3) For each required skill, see if at least one of *this user's* personnel covers it
     const coverageResults = await Promise.all(
       requiredSkills.map(async (reqSkill) => {
         const [rows] = await pool.query(
           `
           SELECT ps.personnel_id
           FROM personnel_skills ps
-          WHERE ps.skill_id = ?
+          JOIN personnel p
+            ON ps.personnel_id = p.id
+          WHERE p.user_id = ?
+            AND ps.skill_id = ?
             AND ps.proficiency >= ?
           LIMIT 1
           `,
-          [reqSkill.skill_id, reqSkill.min_proficiency]
+          [userId, reqSkill.skill_id, reqSkill.min_proficiency]
         );
 
         return {
           skill_id: reqSkill.skill_id,
           skill_name: reqSkill.skill_name,
           min_proficiency: reqSkill.min_proficiency,
-          covered: rows.length > 0
+          covered: rows.length > 0,
         };
       })
     );
 
     const totalRequired = coverageResults.length;
-    const covered = coverageResults.filter(s => s.covered).length;
+    const covered = coverageResults.filter((s) => s.covered).length;
     const percentage = Math.round((covered / totalRequired) * 100);
 
     return res.status(200).json({
@@ -154,14 +201,14 @@ export const getProjectSkillCoverage = async (req, res) => {
         total_required_skills: totalRequired,
         covered_skills: covered,
         coverage_percentage: percentage,
-        skills: coverageResults
-      }
+        skills: coverageResults,
+      },
     });
   } catch (error) {
     console.error("Error computing project skill coverage:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Internal server error"
-    });
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
   }
 };
+

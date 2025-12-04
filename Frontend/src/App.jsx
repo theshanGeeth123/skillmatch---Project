@@ -12,6 +12,7 @@ import PersonnelSkills from "./Pages/PersonnelSkills.jsx";
 import Projects from "./Pages/Projects.jsx";
 import ProjectRequiredSkills from "./Pages/ProjectRequiredSkills.jsx";
 import Matching from "./Pages/Matching.jsx"; 
+import Analytics from "./Pages/Analytics";
 
 
 const App = () => {
@@ -27,6 +28,7 @@ const App = () => {
         <Route path="/projects" element={<Projects />} />
         <Route path="/project-required-skills" element={<ProjectRequiredSkills />} />
         <Route path="/matching" element={<Matching />} />
+         <Route path="/analytics" element={<Analytics />} />
 
       </Routes>
     </BrowserRouter>
