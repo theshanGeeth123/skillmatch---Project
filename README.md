@@ -12,29 +12,22 @@ Step-by-step setup instructions:
   3) How to set up the database (create database, run schema): Dont need to run sql commands separately, All essential database and tables created when run the project via                                         docker
   4) How to configure environment variables:
 
-      # Port on which the backend server will run
-      PORT=5000
-      
-      # Hostname of the MySQL service as defined in docker-compose
-      # Do NOT use "localhost" when using Docker — use the service name instead.
+      PORT=5000 // Port on which the backend server will run
+
       MYSQL_HOST=mysql
-      
-      # Port inside the MySQL Docker container
+
       MYSQL_PORT=3306
-      
-      # MySQL credentials (set your own username/password)
+
       MYSQL_USER=root
       MYSQL_PASSWORD=your_mysql_password_here
       
-      # Name of the database to be created/used
       MYSQL_DATABASE_NAME=your_database_name_here
-      
-      # JWT configuration (used for authentication)
+ 
       JWT_SECRET=your_jwt_secret_key_here
-      JWT_EXPIRES_IN=1h   # Token expiration time
+      JWT_EXPIRES_IN=1h  
 
-  5) How to run the frontend : Go to frontend folder and open with "open with integrated terminal " option and run -> npm run dev
-  6) How to run the backend : Go to the project main folder (not crud folder) and open with "open with integrated terminal " option and run -> docker compose up --build /                                     docker compose up
+  6) How to run the frontend : Go to frontend folder and open with "open with integrated terminal " option and run -> npm run dev
+  7) How to run the backend : Go to the project main folder (not crud folder) and open with "open with integrated terminal " option and run -> docker compose up --build /                                     docker compose up
 
 API endpoint documentation :
 
