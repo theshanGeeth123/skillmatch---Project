@@ -37,50 +37,50 @@ API endpoint documentation :
 
 Personnel CRUD -> 
 
-  http://localhost:5000/api/personnel  = Create a new personnel [Method = POST]
-  http://localhost:5000/api/personnel  = Get all personnel [Method = GET]
-  http://localhost:5000/api/personnel/:id  = Get one personnel by ID [Method = GET]
-  http://localhost:5000/api/personnel/:id  = Update personnel [Method = PUT]
-  http://localhost:5000/api/personnel/:id  = Delete personnel [Method = DELETE]
+  http://localhost:5000/api/personnel  = Create a new personnel [Method = POST] ,
+  http://localhost:5000/api/personnel  = Get all personnel [Method = GET] ,
+  http://localhost:5000/api/personnel/:id  = Get one personnel by ID [Method = GET] ,
+  http://localhost:5000/api/personnel/:id  = Update personnel [Method = PUT] ,
+  http://localhost:5000/api/personnel/:id  = Delete personnel [Method = DELETE] ,
 
 Skills CRUD->
 
-  http://localhost:5000/api/skills = Create a new skill [Method = POST]
-  http://localhost:5000/api/skills = Get all skills [Method = GET]
-  http://localhost:5000/api/skills/:id = Get skill by ID [Method = GET]
-  http://localhost:5000/api/skills/:id = Update skill [Method = PUT]
-  http://localhost:5000/api/skills/:id = Delete skill [Method = DELETE]
+  http://localhost:5000/api/skills = Create a new skill [Method = POST] ,
+  http://localhost:5000/api/skills = Get all skills [Method = GET] ,
+  http://localhost:5000/api/skills/:id = Get skill by ID [Method = GET] ,
+  http://localhost:5000/api/skills/:id = Update skill [Method = PUT] ,
+  http://localhost:5000/api/skills/:id = Delete skill [Method = DELETE] ,
 
 Personnel → Skills Assignment->
 
-  http://localhost:5000/api/personnel/:personnelId/skills = Assign a skill to a personnel [Method = POST]
-  http://localhost:5000/api/personnel/:personnelId/skills = Get skills assigned to personnel [Method = GET]
-  http://localhost:5000/api/personnel/:personnelId/skills/:skillId = Update assigned skill [Method = PUT]
-  http://localhost:5000/api/personnel/:personnelId/skills/:skillId = Remove assigned skill [Method = DELETE]
+  http://localhost:5000/api/personnel/:personnelId/skills = Assign a skill to a personnel [Method = POST] ,
+  http://localhost:5000/api/personnel/:personnelId/skills = Get skills assigned to personnel [Method = GET] ,
+  http://localhost:5000/api/personnel/:personnelId/skills/:skillId = Update assigned skill [Method = PUT] ,
+  http://localhost:5000/api/personnel/:personnelId/skills/:skillId = Remove assigned skill [Method = DELETE] ,
 
 Projects CRUD->
 
-  http://localhost:5000/api/projects = Create a project [Method = POST]
-  http://localhost:5000/api/projects = Get all projects [Method = GET]
-  http://localhost:5000/api/projects/:id = Get project by ID [Method = GET]
-  http://localhost:5000/api/projects/:id = Update project [Method = PUT]
-  http://localhost:5000/api/projects/:id = Delete project [Method = DELETE]
+  http://localhost:5000/api/projects = Create a project [Method = POST] ,
+  http://localhost:5000/api/projects = Get all projects [Method = GET] ,
+  http://localhost:5000/api/projects/:id = Get project by ID [Method = GET] ,
+  http://localhost:5000/api/projects/:id = Update project [Method = PUT] ,
+  http://localhost:5000/api/projects/:id = Delete project [Method = DELETE] ,
 
 Project Required Skills->
 
-http://localhost:5000/api/projects/:projectId/required-skills = Add required skill to project [Method = POST]
-http://localhost:5000/api/projects/:projectId/required-skills = Get project required skills [Method = GET]
-http://localhost:5000/api/projects/:projectId/required-skills/:skillId = Get project required skills [Method = PUT]
-http://localhost:5000/api/projects/:projectId/required-skills/:skillId = Remove required skill [Method = DELETE]
+http://localhost:5000/api/projects/:projectId/required-skills = Add required skill to project [Method = POST] ,
+http://localhost:5000/api/projects/:projectId/required-skills = Get project required skills [Method = GET] ,
+http://localhost:5000/api/projects/:projectId/required-skills/:skillId = Get project required skills [Method = PUT] ,
+http://localhost:5000/api/projects/:projectId/required-skills/:skillId = Remove required skill [Method = DELETE] ,
 
 Project Matching->
 
-http://localhost:5000/api/projects/:projectId/matches = Get best personnel matches for a project [Method = GET]
+http://localhost:5000/api/projects/:projectId/matches = Get best personnel matches for a project [Method = GET] ,
 
 Login & Register->
 
-http://localhost:5000/api/auth/register = Register new user [Method = POST]
-http://localhost:5000/api/auth/login = Login user [Method = POST]
+http://localhost:5000/api/auth/register = Register new user [Method = POST] ,
+http://localhost:5000/api/auth/login = Login user [Method = POST] ,
 
 Database Schema Script -> 
 
@@ -89,6 +89,26 @@ Dont need to run sql commands separately , All the essential tables created when
   crud/db/connection.js includes all the sql commands.
 
 Required API Tests:
+
+1)POST - Create a new personnel (show request body and successful response)
+
+![image alt](https://github.com/theshanGeeth123/skillmatch---Project/blob/main/Create%20a%20new%20personnel.png?raw=true)
+
+2)GET - Retrieve all personnel (show response with data)
+
+![image alt](https://github.com/theshanGeeth123/skillmatch---Project/blob/main/Retrieve%20all%20personnel.png?raw=true)
+
+3)PUT - Update a skill (show request body and response)
+
+![image alt](https://github.com/theshanGeeth123/skillmatch---Project/blob/main/Update%20a%20skill.png?raw=true)
+
+4)POST - Assign a skill to personnel (show request and response)
+
+![image alt](https://github.com/theshanGeeth123/skillmatch---Project/blob/main/Assign%20a%20skill%20to%20personnel.png?raw=true)
+
+5)GET - Matching algorithm endpoint (show project requirements and matched personnel response)
+
+![image alt](https://github.com/theshanGeeth123/skillmatch---Project/blob/main/Matching%20algorithm%20endpoint.png?raw=true)
 
 
 
