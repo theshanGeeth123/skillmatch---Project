@@ -2,6 +2,10 @@ SkillFusion - is a streamlined system for managing personnel, skills and project
 
 Tech Stack: Node.js + Express + MySQL + React + Docker
 
+![image alt](https://github.com/theshanGeeth123/skillmatch---Project/blob/main/Home.png?raw=true)
+
+![image alt](https://github.com/theshanGeeth123/skillmatch---Project/blob/main/Login.png?raw=true)
+
 Prerequisites: Node.js version = v22.16.0 , MySQL version = mysql:latest (This project runs using Docker, and the MySQL service uses the latest official MySQL Docker image (`mysql:latest`) )
 
 Step-by-step setup instructions:
