@@ -111,6 +111,13 @@ Required API Tests:
 ![image alt](https://github.com/theshanGeeth123/skillmatch---Project/blob/main/Matching%20algorithm%20endpoint.png?raw=true)
 
 
+Additional Feature:
+
+User can view Statics using Charts / This web project can use several users , user can create own account and managae their activities without conficting with others data.
+
+
+
+
 
 
 
