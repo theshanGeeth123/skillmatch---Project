@@ -27,7 +27,7 @@ Step-by-step setup instructions:
       MYSQL_USER=root
       MYSQL_PASSWORD=your_mysql_password_here
       
-      MYSQL_DATABASE_NAME=your_database_name_here
+      MYSQL_DATABASE_NAME=ecom  // If you need to change the dabase name you need to change database name in docker-compose.yml file 
  
       JWT_SECRET=your_jwt_secret_key_here
       JWT_EXPIRES_IN=1h  
@@ -118,7 +118,9 @@ Additional Feature:
 User can view Statics using Charts / This web project can use several users , user can create own account and managae their activities without conficting with others data.
 
 
+If you face any issues - >  
 
+  If you fave any port issue change the ports under mysql on services in docker-compose.yml file "3306:3306" to "3310:3306" like thing keep second number 3306 as it is ,
 
 
 
